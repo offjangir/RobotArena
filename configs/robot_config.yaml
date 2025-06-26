@@ -1,0 +1,52 @@
+
+WidowX:
+  name: "WidowX"
+  # path: "./utils/assets/descriptions/widowx_description/wx250s.urdf"
+  path: "./utils/assets/descriptions/trossen_wx250s/wx250s.urdf"
+
+  ee_link: "ee_gripper_link"
+  pc_idxs: 4
+  # pos: [0.147, 0.028, 0.870]   # Use square brackets for a proper list/tuple
+  pos: [  0.127, 0.060, 0.870]   # Use square brackets for a proper list/tuple
+
+
+  # pos : [0.0, 0.0, 0.0]   
+  # quat: [0.707, 0.0, 0.0, 0.0]
+  quat: [0.0, 0.0, 0.0, 1.0]   # Same here
+  
+
+franka:
+  name: "franka"
+  # path: "urdf/panda_bullet/panda.urdf"
+  path: "xml/franka_emika_panda/panda.xml"
+  # ee_link: "panda_hand"
+  ee_link: "hand"
+  pc_idxs: 4
+  # pc_idxs: [1]
+  pos : [0.149, 0.028, 0.874]    # Use square brackets for a proper list/tuple
+  quat: [0.0, 0.0, 0.0, 1.0]   # Same here
+  position:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  quaternion:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+
+ur5:
+  name: "ur5"
+  path: "./utils/assets/ur5e/urdf/ur5e.urdf"
+  ee_link: "ee_virtual_link"
+  pc_idxs: 4
+  # pc_idxs: [1]
+  position:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  quaternion:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0

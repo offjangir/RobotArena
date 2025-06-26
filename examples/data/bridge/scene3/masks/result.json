@@ -1,0 +1,50 @@
+[
+    {
+        "object_name": "a toy knife with a yellow handle and white blade",
+        "count": [
+            0
+        ],
+        "width": 0.035,
+        "height": 0.015,
+        "length": 0.18,
+        "mass": 0.025,
+        "friction": 0.4,
+        "surface": "Plastic."
+    },
+    {
+        "object_name": "a red toy bell pepper",
+        "count": [
+            1
+        ],
+        "width": 0.08,
+        "height": 0.07,
+        "length": 0.08,
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "a blue cloth_destination",
+        "count": [
+            2
+        ],
+        "width": 1.0,
+        "height": 0.005,
+        "length": 1.0,
+        "mass": 0.5,
+        "friction": 0.6,
+        "surface": "Rough."
+    },
+    {
+        "object_name": "a metal bowl_target",
+        "count": [
+            3
+        ],
+        "width": 0.25,
+        "height": 0.08,
+        "length": 0.25,
+        "mass": 0.5,
+        "friction": 0.4,
+        "surface": "Metal"
+    }
+]

@@ -1,0 +1,6 @@
+[submodule "ManiSkill2_real2sim"]
+	path = ManiSkill2_real2sim
+	url = https://github.com/simpler-env/ManiSkill2_real2sim
+[submodule "simpler_env/policies/sim_cogact/CogACT"]
+	path = simpler_env/policies/sim_cogact/CogACT
+	url = https://github.com/microsoft/CogACT

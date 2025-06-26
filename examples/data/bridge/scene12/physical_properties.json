@@ -1,0 +1,38 @@
+[
+    {
+        "object_name": "toy knife",
+        "count": [
+            0
+        ],
+        "width": 0.02,
+        "height": 0.01,
+        "length": 0.18,
+        "mass": 0.05,
+        "friction": 0.3,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "red capped bottle_target",
+        "count": [
+            1
+        ],
+        "width": 0.075,
+        "height": 0.22,
+        "length": 0.075,
+        "mass": 0.12,
+        "friction": 0.4,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "toy strawberry",
+        "count": [
+            2
+        ],
+        "width": 0.03,
+        "height": 0.04,
+        "length": 0.035,
+        "mass": 0.01,
+        "friction": 0.4,
+        "material": "Plastic"
+    }
+]

@@ -1,0 +1,21 @@
+[
+    {
+        "object_name": "carrot_target",
+        "count": [
+            0
+        ],
+        "pos":[-0.18, 0.058, 0.90],
+        "scale": 1.0,
+        "rot":[0, 0, 0]
+
+    },
+    {
+        "object_name": "plate_destination",
+        "count": [
+            1
+        ],
+        "pos":[-0.10, 0.058, 0.90],
+        "scale": 1.0,
+        "rot":[0, 0, 0]
+    }
+]

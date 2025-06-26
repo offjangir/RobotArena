@@ -1,0 +1,3 @@
+base_folder: "./examples/data"
+robot: "WidowX"
+scene_name: "scene3"

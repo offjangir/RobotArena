@@ -1,0 +1,26 @@
+[
+    {
+        "object_name": "metal pot_destination",
+        "count": [
+            0
+        ],
+        "width": 0.22,
+        "height": 0.18,
+        "length": 0.22,
+        "mass": 1.5,
+        "friction": 0.5,
+        "material": "Metal"
+    },
+    {
+        "object_name": "toy tomato_target",
+        "count": [
+            1
+        ],
+        "width": 0.06,
+        "height": 0.05,
+        "length": 0.06,
+        "mass": 0.04,
+        "friction": 0.4,
+        "material": "Plastic"
+    }
+]

@@ -1,0 +1,50 @@
+[
+    {
+        "object_name": "toy food can",
+        "count": [
+            0
+        ],
+        "width": 0.06,
+        "height": 0.08,
+        "length": 0.06,
+        "mass": 0.03,
+        "friction": 0.4,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "orange toy pan_destination",
+        "count": [
+            1
+        ],
+        "width": 0.15,
+        "height": 0.04,
+        "length": 0.25,
+        "mass": 0.1,
+        "friction": 0.4,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "white toy spoon_target",
+        "count": [
+            2
+        ],
+        "width": 0.02,
+        "height": 0.005,
+        "length": 0.1,
+        "mass": 0.01,
+        "friction": 0.35,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "white toy knife with yellow handle",
+        "count": [
+            3
+        ],
+        "width": 0.025,
+        "height": 0.015,
+        "length": 0.18,
+        "mass": 0.05,
+        "friction": 0.4,
+        "material": "Plastic"
+    }
+]

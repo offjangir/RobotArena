@@ -1,0 +1,47 @@
+[
+    {
+        "object_name": "toy hammer",
+        "count": [
+            0
+        ],
+        "mass": 0.07,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "blue block",
+        "count": [
+            1
+        ],
+        "mass": 0.08,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "metal lid",
+        "count": [
+            2
+        ],
+        "mass": 0.1,
+        "friction": 0.5,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "metal pot_destination",
+        "count": [
+            3
+        ],
+        "mass": 0.2,
+        "friction": 0.5,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "stuffed animal_target",
+        "count": [
+            4
+        ],
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Rough"
+    }
+]

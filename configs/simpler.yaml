@@ -1,0 +1,5 @@
+base_folder: "./examples/data"
+robot: "WidowX"
+scene_name: "default2"
+replace_name: "scene1"
+obj_cnt: 4

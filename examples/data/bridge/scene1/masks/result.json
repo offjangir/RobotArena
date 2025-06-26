@@ -1,0 +1,56 @@
+[
+    {
+        "object_name": "orange plastic cup",
+        "count": [
+            0
+        ],
+        "mass": 0.02,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "red strawberry",
+        "count": [
+            1
+        ],
+        "mass": 0.01,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "metal colander_destination",
+        "count": [
+            2
+        ],
+        "mass": 0.05,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "yellow cheese wedge",
+        "count": [
+            3
+        ],
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "yellow banana_target",
+        "count": [
+            4
+        ],
+        "mass": 0.02,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "red sausage",
+        "count": [
+            5
+        ],
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Plastic"
+    }
+]

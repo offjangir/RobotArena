@@ -1,0 +1,38 @@
+[
+    {
+        "object_name": "spoon_target",
+        "count": [
+            0
+        ],
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "pot",
+        "count": [
+            1
+        ],
+        "mass": 0.1,
+        "friction": 0.2,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "cloth_destination",
+        "count": [
+            2
+        ],
+        "mass": 0.02,
+        "friction": 0.7,
+        "surface": "Rough"
+    },
+    {
+        "object_name": "toy chicken drumstick",
+        "count": [
+            3
+        ],
+        "mass": 0.05,
+        "friction": 0.5,
+        "surface": "Plastic"
+    }
+]

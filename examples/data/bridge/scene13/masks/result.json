@@ -1,0 +1,26 @@
+[
+    {
+        "object_name": "red block",
+        "count": [
+            0
+        ]
+    },
+    {
+        "object_name": "yellow block",
+        "count": [
+            1
+        ]
+    },
+    {
+        "object_name": "blue block",
+        "count": [
+            2
+        ]
+    },
+    {
+        "object_name": "green block",
+        "count": [
+            3
+        ]
+    }
+]

@@ -1,0 +1,56 @@
+[
+    {
+        "object_name": "small metal pot",
+        "count": [
+            0
+        ],
+        "mass": 0.1,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "folded green cloth",
+        "count": [
+            1
+        ],
+        "mass": 0.05,
+        "friction": 0.4,
+        "surface": "Rough"
+    },
+    {
+        "object_name": "yellow toy pepper",
+        "count": [
+            2
+        ],
+        "mass": 0.03,
+        "friction": 0.4,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "can of tomato sauce",
+        "count": [
+            3
+        ],
+        "mass": 0.15,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "can of pineapple slices",
+        "count": [
+            4
+        ],
+        "mass": 0.15,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "toy knife_target",
+        "count": [
+            5
+        ],
+        "mass": 0.02,
+        "friction": 0.4,
+        "surface": "Plastic"
+    }
+]

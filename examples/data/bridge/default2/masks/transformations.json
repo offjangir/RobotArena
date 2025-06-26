@@ -1,0 +1,22 @@
+{
+    "image_0000_segmented": {
+        "scale": 0.8,
+        "translation": [
+            -0.18, 0.058, 0.89
+        ],
+        "rotation": [
+            0, 0, 0
+        ],
+        "emission":[0.223, 0.383, 0.293]
+    },
+    "image_0001_segmented": {
+        "scale": 0.8,
+        "translation": [
+            -0.10, 0.058, 0.89
+        ],
+        "rotation": [
+            0, 0, 0
+        ],
+        "emission":[0.9743002, 0.93227685, 0.52952322]
+    }
+}

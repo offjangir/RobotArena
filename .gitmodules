@@ -1,0 +1,9 @@
+[submodule "SimplerEnv"]
+	path = SimplerEnv
+	url = https://github.com/sorceressyidi/SimplerEnv
+[submodule "CogACT"]
+	path = CogACT
+	url = https://github.com/microsoft/CogACT
+[submodule "RoboVLM"]
+	path = RoboVLM
+	url = https://github.com/sorceressyidi/RoboVLMs

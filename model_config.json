@@ -1,0 +1,5 @@
+{
+    "spatial_path": "/data/user_data/yjangir/yash/SimplerEnv/spatialvla-4b-224-pt",
+    "robovlm_ckpt": "/data/user_data/yjangir/yash/tested_bed/RoboVLMs/RoboVLMs/checkpoints/kosmos_ph_bridge-post-train.pt",
+    "robovlm_config": "/data/user_data/yjangir/yash/tested_bed/RoboVLMs/RoboVLMs/configs/kosmos_ph_post_train_bridge.json"
+}

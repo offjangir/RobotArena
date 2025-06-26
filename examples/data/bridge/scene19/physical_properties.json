@@ -1,0 +1,50 @@
+[
+    {
+        "object_name": "small metal saucepan",
+        "count": [
+            0
+        ],
+        "width": 0.16,
+        "height": 0.09,
+        "length": 0.16,
+        "mass": 1.2,
+        "friction": 0.6,
+        "material": "Metal"
+    },
+    {
+        "object_name": "spoon with blue handle",
+        "count": [
+            1
+        ],
+        "width": 0.035,
+        "height": 0.01,
+        "length": 0.18,
+        "mass": 0.05,
+        "friction": 0.45,
+        "material": "Metal"
+    },
+    {
+        "object_name": "toy orange half_target",
+        "count": [
+            2
+        ],
+        "width": 0.08,
+        "height": 0.04,
+        "length": 0.08,
+        "mass": 0.05,
+        "friction": 0.4,
+        "material": "Plastic"
+    },
+    {
+        "object_name": "green cloth_destination",
+        "count": [
+            3
+        ],
+        "width": 1.0,
+        "height": 0.002,
+        "length": 1.5,
+        "mass": 0.3,
+        "friction": 0.4,
+        "material": "Rough"
+    }
+]

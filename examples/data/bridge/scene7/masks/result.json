@@ -1,0 +1,56 @@
+[
+    {
+        "object_name": "folded blue towel_destination",
+        "count": [
+            0
+        ],
+        "mass": 0.05,
+        "friction": 0.5,
+        "surface": "Rough"
+    },
+    {
+        "object_name": "toy mushroom",
+        "count": [
+            1
+        ],
+        "mass": 0.02,
+        "friction": 0.4,
+        "surface": "Rough"
+    },
+    {
+        "object_name": "toy pot_target",
+        "count": [
+            2
+        ],
+        "mass": 0.1,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "toy corn with spoon",
+        "count": [
+            3
+        ],
+        "mass": 0.05,
+        "friction": 0.3,
+        "surface": "Plastic"
+    },
+    {
+        "object_name": "can of tomato sauce",
+        "count": [
+            4
+        ],
+        "mass": 0.15,
+        "friction": 0.3,
+        "surface": "Metal"
+    },
+    {
+        "object_name": "can of pineapple slices",
+        "count": [
+            5
+        ],
+        "mass": 0.15,
+        "friction": 0.3,
+        "surface": "Metal"
+    }
+]
