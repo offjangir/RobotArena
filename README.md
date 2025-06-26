@@ -1,25 +1,40 @@
-# <img src="figs/arena.png" width="20"/> Robotic Policy Evaluation Framework
+# <img src="figs/arena.png" width="24"/> **Robotic Policy Evaluation Framework**
 
-This is the open-source framework to evaluate robotic policies across varying perturbations (camera, color, object arrangement, etc.) using simulated scenes from our custom-built **Robot Arenas**! Supports multiple models like CogAct, RoboVLM, Octo, and SpatialVLA.
+Welcome to the **Robotic Policy Evaluation Framework**, an open-source toolkit for evaluating robotic policies under diverse **scene perturbations** such as:
 
-## Contents
+- 🎥 Camera angle shifts  
+- 🎨 Color and lighting changes  
+- 🧩 Object rearrangements  
 
-- [Environment Setup](#environment-setup)
-  - [CogAct](#1-environment-setup-for-cogact)
-  - [RoboVLM](#2-environment-setup-for-robovlm)
-  - [SpatialVLA and Octo](#3-environment-setup-for-spatialvla-and-octo)
-  - [Genesis env](#4-genesis-env-genesis)
+Our framework leverages custom-built simulated environments—called **Robot Arenas**—and supports a range of popular models including:
 
-- [Running Evaluation](#running-evaluation)
-    - Running Policy Servers
-        - [Octo Server](#octo-server)
-        - [CogAct](#cogact)
-        - [RoboVLM](#robovlm)
-        - [SpatialVLA](#spatialvla)
-    - [Example Data Structure](#example-data-structure)
-    - [Evaluation Scripts](#evaluation-scripts)
-- [Output File Structure](#output-file-structure)
-- [GVL Automated Scoring Script](#gvl-automated-scoring-script)
+- **CogAct**
+- **RoboVLM**
+- **Octo**
+- **SpatialVLA**
+
+---
+
+## 📚 Contents
+
+- [🛠 Environment Setup](#environment-setup)
+  - [1. CogAct](#1-environment-setup-for-cogact)
+  - [2. RoboVLM](#2-environment-setup-for-robovlm)
+  - [3. SpatialVLA & Octo](#3-environment-setup-for-spatialvla-and-octo)
+  - [4. Genesis Env](#4-genesis-env-genesis)
+
+- [🚀 Running Evaluation](#running-evaluation)
+  - **Policy Servers**
+    - [Octo Server](#octo-server)
+    - [CogAct](#cogact)
+    - [RoboVLM](#robovlm)
+    - [SpatialVLA](#spatialvla)
+  - [📁 Example Data Structure](#example-data-structure)
+  - [📜 Evaluation Scripts](#evaluation-scripts)
+
+- [📦 Output File Structure](#output-file-structure)  
+- [🧮 GVL Automated Scoring Script](#gvl-automated-scoring-script)
+
 
 
 ## Environment Setup
