@@ -58,7 +58,6 @@ pip install -e .
 pip install uvicorn fastapi "tomli>=1.1.0" "rpds-py>=0.7.1" "traitlets>=5.3"
 cd ../SimplerEnv
 python -m pip install pip==25.0.1
-git submodule update --init --recursive
 pip install -e .
 pip install -r requirements_full_install.txt 
 cd ManiSkill2_real2sim
@@ -70,7 +69,6 @@ cp ./SimplerEnv/simpler_env/policies/sim_cogact/adaptive_ensemble.py ./SimplerEn
 
 ### 2. Environment Setup for RoboVLM
 
-* You should follow the instructions on how to use/download the RoboVLM model as instructed here https://github.com/Nicolinho/RoboVLM
 
 ```bash
 conda env create -f env/robovlm.yml
@@ -86,7 +84,6 @@ cd ../..
 
 ### 3. Environment Setup for SpatialVLA and Octo
 
-* You should follow the instructions on how to use/download the Octo model and spatialVla model as instructed here https://github.com/octo-models/octo and https://github.com/SpatialVLA/SpatialVLA
 
 ```bash
 conda create -n simpler_env python=3.10
@@ -108,7 +105,7 @@ pip install "transformers == 4.47.0"
 
 ### 4. Genesis env `genesis`
 
-* Follow the instructions here https://github.com/Genesis-Embodied-AI/Genesis
+* Follow the instructions in the [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis)
 
 
 ## Running Evaluation
@@ -129,7 +126,7 @@ Each policy is assigned a default port like above. If you wish to use a differen
 #### Octo Server
 Activate the Conda environment and run the server:
 ```bash
-conda activate simplier_env
+conda activate simpler_env
 export PYTHONPATH=$(pwd)
 python src/server/server_octo.py
 ```
@@ -138,7 +135,7 @@ python src/server/server_octo.py
 
 #### CogAct
 
-* You should follow the instructions on how to download/use the CogAct model as instructed here https://github.com/microsoft/CogACT
+* You should follow the instructions on how to download/use the CogAct model as instructed in the [CogACT repository](https://github.com/microsoft/CogACT)
 
 Activate the Conda environment and run the server:
 ```bash
@@ -159,7 +156,7 @@ Before running the script, make sure to set the model path to your local model p
     "spatial_path": <path_to_your_model>,
 }
 ```
-You can download the model from instrustions here https://github.com/SpatialVLA/SpatialVLA
+You can download the model from instrustions in the [SpatialVLA repository](https://github.com/SpatialVLA/SpatialVLA)
 
 
 Activate the Conda environment and run the server:
@@ -181,9 +178,9 @@ Before running the script, make sure to set the model path to your local model p
 }
 ```
 
-You can get the checkpoint and configs from https://huggingface.co/robovlms/RoboVLMs. (We use `kosmos_ph_bridge-post-train.pt` and `kosmos_ph_bridge-post-train.json` as the default checkpoint and config file.)
+You can get the checkpoint and configs from the [RoboVLMs Hugging Face repository](https://huggingface.co/robovlms/RoboVLMs). (We use `kosmos_ph_bridge-post-train.pt` and `kosmos_ph_bridge-post-train.json` as the default checkpoint and config file.)
 
-* You should also download folder `kosmos-2-patch14-224` from https://huggingface.co/microsoft/kosmos-2-patch14-224 and put it `RoboVLM/.vlms/kosmos-2-patch14-224`.
+Then, you should also download folder `kosmos-2-patch14-224` from [here](https://huggingface.co/microsoft/kosmos-2-patch14-224) and put it in `RoboVLM/.vlms/kosmos-2-patch14-224`.
 
 Activate the Conda environment and run the server:
 ```bash
@@ -256,7 +253,7 @@ bash bash_scripts/default_test.bash 9020 spatial generate
 This command will run the default test on the `spatial` policy server on port `9020` and save the results in the `generate_test` folder. 
 
 * If you want to run the test on other policies, you can change the policy name and port number accordingly. 
-* If you want to run the test on the default scenes, you can change the `generate` to `default` in the command.
+* If you want to run the test on the default scenes, you can change from `generate` to `default` in the command.
 
 You can also modify the following arguments in the bash script to customize the test:
 
