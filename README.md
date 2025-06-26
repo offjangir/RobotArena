@@ -21,14 +21,15 @@ Our framework leverages custom-built simulated environments—called **Robot Are
   - [1. CogAct](#1-environment-setup-for-cogact)
   - [2. RoboVLM](#2-environment-setup-for-robovlm)
   - [3. SpatialVLA & Octo](#3-environment-setup-for-spatialvla-and-octo)
-  - [4. Genesis Env](#4-genesis-env-genesis)
+  - [4. Genesis](#4-genesis-env-genesis)
+  - [5. Gemini](#5-gemini-env-gemini)
 
 - [🚀 Running Evaluation](#running-evaluation)
   - **Policy Servers**
     - [Octo Server](#octo-server)
-    - [CogAct](#cogact)
-    - [RoboVLM](#robovlm)
-    - [SpatialVLA](#spatialvla)
+    - [CogAct Server](#cogact)
+    - [RoboVLM Server](#robovlm)
+    - [SpatialVLA Server](#spatialvla)
   - [📁 Example Data Structure](#example-data-structure)
   - [📜 Evaluation Scripts](#evaluation-scripts)
 
@@ -103,10 +104,15 @@ pip3 install torch torchvision torchaudio
 pip install "transformers == 4.47.0"
 ```
 
-### 4. Genesis env `genesis`
+### 4. Genesis Environment `genesis`
 
 * Follow the instructions in the [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis)
 
+### 5. Gemini Environment `gemini`
+
+```
+conda env create -f env/gemini.yml
+```
 
 ## Running Evaluation
 
@@ -405,29 +411,30 @@ This script provides automated scoring for **GVL (Grounded Video Language)** usi
 
 ### Requirements
 
-- Python 3.7+
 - Gemini 2.5 Pro API key
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
 
 Please use the bash script GVL.bash for this.
+
+
+* use `policy` to specify the policy you want to use, e.g., `spatial`, `robovlm`, `cogact`, `octo`.
+* use `variant` to specify the variant of the test you want to run, e.g., `background_test`, `default_test`, `camera_test`, etc.
+* sepecify in `inference` the path to the folder where you have saved the results of the test you want to evaluate, e.g., `./generate_test/$policy/$variant/` for the generated scenes or `./default_test/$policy/$variant/` for the default scenes.
+* put your Gemini API key in `--key` argument in the bash script.
 
 ```bash
 policy="spatial"
 variant="background_test"
 
 python src/pipeline/GVL_multithreaded.py \
-    --inference "/data/evaluation/generate_test/$policy/$variant/" \
-    --base_dir "/data/scene/scene_generation/data/bridge"\
+    --inference "./generate_test/$policy/$variant/" \
+    --base_dir "./examples/data/bridge" \
     --key "" \
     --zero true \
     --frequency 3 \
-    --dir "/data/scene/openvla/eval_paper_latest_generate_new_test" \
+    --dir "./eval_paper_latest_generate_new_test" \
     --test $variant \
     --policy $policy \
     --debug False \
     --model "gemini-2.5-pro-preview-05-06" \
+```
