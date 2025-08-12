@@ -21,15 +21,15 @@ Our framework leverages custom-built simulated environments—called **Robot Are
   - [1. CogAct](#1-environment-setup-for-cogact)
   - [2. RoboVLM](#2-environment-setup-for-robovlm)
   - [3. SpatialVLA & Octo](#3-environment-setup-for-spatialvla-and-octo)
-  - [4. Genesis](#4-genesis-env-genesis)
-  - [5. Gemini](#5-gemini-env-gemini)
+  - [4. Genesis](#4-environment-setup-for-genesis)
+  - [5. Gemini](#5-environment-setup-for-gemini)
 
 - [🚀 Running Evaluation](#running-evaluation)
   - **Policy Servers**
+    - [RoboVLM Server](#robovlm-server)
     - [Octo Server](#octo-server)
-    - [CogAct Server](#cogact)
-    - [RoboVLM Server](#robovlm)
-    - [SpatialVLA Server](#spatialvla)
+    - [SpatialVLA Server](#spatialvla-server)
+    - [CogAct Server](#cogact-server)
   - [📁 Example Data Structure](#example-data-structure)
   - [📜 Evaluation Scripts](#evaluation-scripts)
 
@@ -38,7 +38,7 @@ Our framework leverages custom-built simulated environments—called **Robot Are
 
 
 
-## Environment Setup
+## 🛠 Environment Setup
 
 * First update the submodules in the repository to ensure all dependencies are correctly initialized:
 
@@ -50,6 +50,8 @@ We have set up separate servers for each policy for evaluation. Please follow th
 
 ### 1. Environment Setup for CogAct
 
+<details>
+<summary>environment cogact (click to expand)</summary>
 
 ```bash
 conda env create -f env/cogact.yml
@@ -67,9 +69,13 @@ pip install --upgrade typing_extensions
 cd ../..
 cp ./SimplerEnv/simpler_env/policies/sim_cogact/adaptive_ensemble.py ./SimplerEnv/simpler_env/policies/sim_cogact/CogACT/adaptive_ensemble.py
 ```
+</details>
 
 ### 2. Environment Setup for RoboVLM
 
+
+<details>
+<summary>environment robovlms (click to expand)</summary>
 
 ```bash
 conda env create -f env/robovlm.yml
@@ -82,9 +88,12 @@ cd ManiSkill2_real2sim
 pip install -e .
 cd ../..
 ```
+</details>
 
 ### 3. Environment Setup for SpatialVLA and Octo
 
+<details>
+<summary>environment simpler_env (click to expand)</summary>
 
 ```bash
 conda create -n simpler_env python=3.10
@@ -103,16 +112,37 @@ pip install "scipy<1.13"
 pip3 install torch torchvision torchaudio
 pip install "transformers == 4.47.0"
 ```
+</details>
 
-### 4. Genesis Environment `genesis`
+### 4. Environment Setup for Genesis
 
-* Follow the instructions in the [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis)
 
-### 5. Gemini Environment `gemini`
+<details>
+<summary>environment genesis (click to expand)</summary>
 
+```bash 
+cd ..
+git clone https://github.com/Genesis-Embodied-AI/Genesis
+cd Genesis
+git checkout 1ad1301
+conda create -n genesis python=3.10
+conda activate genesis
+pip install -e .
+pip3 install torch torchvision
+pip install pyyaml sapien
 ```
+</details>
+
+### 5. Environment Setup for Gemini
+
+
+<details>
+<summary>environment gemini (click to expand)</summary>
+
+```bash
 conda env create -f env/gemini.yml
 ```
+</details>
 
 ## Running Evaluation
 
@@ -129,51 +159,10 @@ def run(self, host: str = "0.0.0.0", port: int = 9030) -> None:
 
 Each policy is assigned a default port like above. If you wish to use a different port, you can modify it directly in the corresponding script.
 
-#### Octo Server
-Activate the Conda environment and run the server:
-```bash
-conda activate simpler_env
-export PYTHONPATH=$(pwd)
-python src/server/server_octo.py
-```
+### RoboVlM Server
 
-* Octo server is default to port `9010`
-
-#### CogAct
-
-* You should follow the instructions on how to download/use the CogAct model as instructed in the [CogACT repository](https://github.com/microsoft/CogACT)
-
-Activate the Conda environment and run the server:
-```bash
-conda activate cogact
-export HF_HOME="/data/hf_cache/"
-python src/server/server_cogact.py
-```
-
-* CogACT server is default to port `9030`
-
-#### spatialVla
-
-
-Before running the script, make sure to set the model path to your local model path in the `model_config.json` file.
-
-```json
-{
-    "spatial_path": <path_to_your_model>,
-}
-```
-You can download the model from instrustions in the [SpatialVLA repository](https://github.com/SpatialVLA/SpatialVLA)
-
-
-Activate the Conda environment and run the server:
-```bash
-conda activate simpler_env
-export PYTHONPATH=$(pwd)
-python src/server/server_spatial.py
-```
-* spatialVLA server is default to port `9020`
-
-### RoboVlm
+<details>
+<summary><b>Detailed instructions</b> for preparing checkpoint and config files <b>(click to expand)</b></summary>
 
 Before running the script, make sure to set the model path to your local model path in the `model_config.json` file.
 
@@ -187,8 +176,11 @@ Before running the script, make sure to set the model path to your local model p
 You can get the checkpoint and configs from the [RoboVLMs Hugging Face repository](https://huggingface.co/robovlms/RoboVLMs). (We use `kosmos_ph_bridge-post-train.pt` and `kosmos_ph_bridge-post-train.json` as the default checkpoint and config file.)
 
 Then, you should also download folder `kosmos-2-patch14-224` from [here](https://huggingface.co/microsoft/kosmos-2-patch14-224) and put it in `RoboVLM/.vlms/kosmos-2-patch14-224`.
+</details>
 
-Activate the Conda environment and run the server:
+
+After setting up the model path, you can run the server with the following command:
+
 ```bash
 cd RoboVLM
 conda activate robovlms
@@ -196,6 +188,59 @@ python eval/simpler/server_robovlm.py
 ```
 
 * RoboVLM server is default to `9000`
+
+
+### Octo Server
+
+Activate the Conda environment and run the server:
+```bash
+conda activate simpler_env
+export PYTHONPATH=$(pwd)
+python src/server/server_octo.py
+```
+
+* Octo server is default to port `9010`
+
+### spatialVLA Server
+
+<details>
+<summary><b>Detailed instructions</b> for preparing checkpoint <b>(click to expand)</b></summary>
+
+Before running the script, make sure to set the model path to your local model path in the `model_config.json` file.
+
+```json
+{
+    "spatial_path": <path_to_your_model>,
+}
+```
+You can download the model from instrustions in the [SpatialVLA repository](https://github.com/SpatialVLA/SpatialVLA)
+
+</details>
+
+After setting up the model path, you can run the server with the following command:
+
+```bash
+conda activate simpler_env
+export PYTHONPATH=$(pwd)
+python src/server/server_spatial.py
+```
+* spatialVLA server is default to port `9020`
+
+
+### CogAct Server
+
+* You should refer to the instructions on how to download/use the CogAct model in the [CogACT repository](https://github.com/microsoft/CogACT)
+
+Activate the Conda environment and run the server:
+
+```bash
+conda activate cogact
+python src/server/server_cogact.py
+```
+
+* CogACT server is default to port `9030`
+
+
 
 ## Example Data Structure
 
@@ -241,25 +286,26 @@ scene_name: "default1" # Identifier for the base scene for this test, you can ch
 ```
 
 
-### 1.Default Test [For both Default and Generated Scenes]
+### 1.Default Test [📌 For both Default and Generated Scenes]
 
 This test evaluates the performance of the policy in a simulated scene with all the default settings. (camera angle, background, object positions, etc.)
 
-The test is performed on both the default scene (e.g., `scene1`) and the generated scenes (e.g., `scene2`).
+The test is performed on both the default scene (e.g., `default1`) and the generated scenes (e.g., `scene2`).
 
 > Before running the test, make sure you have already run the server for the policy you want to test on the desired port.
 
 
-* Command:
+#### Example: Run default test on each policy
 
-```bash
-bash bash_scripts/default_test.bash 9020 spatial generate
-```
+| Policy   | Command |
+|----------|---------|
+| SpatialVLA | `bash bash_scripts/default_test.bash 9020 spatial generate` |
+| RoboVLM    | `bash bash_scripts/default_test.bash 9000 robovlm generate` |
+| Octo       | `bash bash_scripts/default_test.bash 9010 octo generate` |
+| CogAct     | `bash bash_scripts/default_test.bash 9030 cogact generate` |
 
-This command will run the default test on the `spatial` policy server on port `9020` and save the results in the `generate_test` folder. 
-
-* If you want to run the test on other policies, you can change the policy name and port number accordingly. 
-* If you want to run the test on the default scenes, you can change from `generate` to `default` in the command.
+ 
+If you want to run the test on the default scenes, you can change from `generate` to `default` in the command.
 
 You can also modify the following arguments in the bash script to customize the test:
 
@@ -268,7 +314,7 @@ You can also modify the following arguments in the bash script to customize the 
 
 * `--config` : Path to the config file, default to `configs/default.yaml`. You can change it to your own config file if you customize the test settings.
 
-### 2. Background Variation Test [For both Default and Generated Scenes]
+### 2. Background Variation Test [📌 For both Default and Generated Scenes]
 
 This test evaluates the performance of the policy in a simulated scene with a different background image. It will test the scene on all the background images in the specified folder and 5 example background images for testing are provided in the `examples/background` folder.
 
@@ -283,7 +329,7 @@ Additionally, you can specify the different background images to use for the tes
 
 
 
-### 3. Background Color Variation Test [For both Default and Generated Scenes]
+### 3. Background Color Variation Test [📌 For both Default and Generated Scenes]
 
 This script evaluates how changing the color composition of the background in a simulated scene affects the robustness of a robotic policy. The background image is gradually blended with its RGB-transformed variant at various strengths, and a predefined test pipeline is executed on each variant.
 
@@ -293,7 +339,7 @@ This script evaluates how changing the color composition of the background in a 
 bash bash_scripts/adv_background_test.bash 9020 spatial generate
 ```
 
-### 4. Camera Variation Test [For both Default and Generated Scenes]
+### 4. Camera Variation Test [📌 For both Default and Generated Scenes]
 
 This test evaluates the performance of the policy in a simulated scene with a different camera angle. It will move the camera `up`, `down`, `left`,`right`, `forward`, and `backward` by a certain distance and test the scene on all the camera angles to see how the policy performs.
 
@@ -303,7 +349,7 @@ This test evaluates the performance of the policy in a simulated scene with a di
 bash bash_scripts/camera_test.bash 9020 spatial generate
 ```
 
-### 5. Permutation Test [For Generated Scenes Only]
+### 5. Permutation Test [🧪 For Generated Scenes Only]
 
 This test only evaluates the generated scenes. It will exchange the positions of the objects in the scene -- use different permutations of the objects in the scene to see how the policy performs.
 
@@ -313,7 +359,7 @@ This test only evaluates the generated scenes. It will exchange the positions of
 bash bash_scripts/permute_test.bash 9020 spatial generate
 ```
 
-### 6. Pose Variation Test [For Default Scenes Only]
+### 6. Pose Variation Test [🏗 For Default Scenes Only]
 
 This test will only evaluate the default scenes. It will randomly generate different poses and rotations of the objects in the scene and test the scene on all the poses to see how the policy performs.
 
@@ -323,7 +369,7 @@ This test will only evaluate the default scenes. It will randomly generate diffe
 bash bash_scripts/pose_test.bash 9020 spatial default
 ```
 
-### 7. Object Variation Test [For Default Scenes Only]
+### 7. Object Variation Test [🏗 For Default Scenes Only]
 
 This test will only evaluate the default scenes. It will replace the original target object for the task will be changed (e.g., from a default spoon to another object generated frin another real scene specified by `obj_cnt` in the config), and the task is repeated.
 
@@ -413,28 +459,14 @@ This script provides automated scoring for **GVL (Grounded Video Language)** usi
 
 - Gemini 2.5 Pro API key
 
+```bash
+bash bash_scripts/GVL.bash
+```
 
-Please use the bash script GVL.bash for this.
-
-
+Please use the bash script `bash_scripts/GVL.bash` for this. In GVL.bash, you can modify the following arguments to customize the evaluation:
 * use `policy` to specify the policy you want to use, e.g., `spatial`, `robovlm`, `cogact`, `octo`.
 * use `variant` to specify the variant of the test you want to run, e.g., `background_test`, `default_test`, `camera_test`, etc.
 * sepecify in `inference` the path to the folder where you have saved the results of the test you want to evaluate, e.g., `./generate_test/$policy/$variant/` for the generated scenes or `./default_test/$policy/$variant/` for the default scenes.
 * put your Gemini API key in `--key` argument in the bash script.
+* put the output folder path in `--dir` argument in the bash script.
 
-```bash
-policy="spatial"
-variant="background_test"
-
-python src/pipeline/GVL_multithreaded.py \
-    --inference "./generate_test/$policy/$variant/" \
-    --base_dir "./examples/data/bridge" \
-    --key "" \
-    --zero true \
-    --frequency 3 \
-    --dir "./eval_paper_latest_generate_new_test" \
-    --test $variant \
-    --policy $policy \
-    --debug False \
-    --model "gemini-2.5-pro-preview-05-06" \
-```

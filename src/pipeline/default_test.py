@@ -279,10 +279,7 @@ class DefaulTest:
                                     link_obj = np.array([e.links[0].idx], dtype=gs.np_int)
                                     rigid.add_weld_constraint(link_obj, link_robot)
                                     welded = True
-                                    
-            reward += self.reward_reaching_cube(self.ee_link, self.target_asset)
             imx.append(image)
-        print(f"Reward: {reward}")
         
         folder = self.output_dir
         os.makedirs(folder, exist_ok=True)
