@@ -1,5 +1,4 @@
-# <img src="figs/arena.png" width="24"/> **ROBOTARENA ∞ : UNLIMITED ROBOT BENCHMARKING
-VIA REAL-TO-SIM TRANSLATION**
+# <img src="figs/arena.png" width="24"/> **RobotArena ∞ : Unlimited Robot Benchmarking Via Real-To-Sim Translation**
 
 Welcome to the **RobotArena ∞**, an open-source toolkit for evaluating robotic policies under diverse **scene perturbations**.
 
