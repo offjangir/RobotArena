@@ -1,10 +1,7 @@
-# <img src="figs/arena.png" width="24"/> **Robotic Policy Evaluation Framework**
+# <img src="figs/arena.png" width="24"/> **ROBOTARENA ∞ : UNLIMITED ROBOT BENCHMARKING
+VIA REAL-TO-SIM TRANSLATION**
 
-Welcome to the **Robotic Policy Evaluation Framework**, an open-source toolkit for evaluating robotic policies under diverse **scene perturbations** such as:
-
-- 🎥 Camera angle shifts  
-- 🎨 Color and lighting changes  
-- 🧩 Object rearrangements  
+Welcome to the **RobotArena ∞**, an open-source toolkit for evaluating robotic policies under diverse **scene perturbations**.
 
 Our framework leverages custom-built simulated environments—called **Robot Arenas**—and supports a range of popular models including:
 
