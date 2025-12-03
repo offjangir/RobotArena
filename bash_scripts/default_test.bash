@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate conda environment
-source ~/miniconda3/etc/profile.d/conda.sh  # Change this to your actual conda path
+source ~/user_data/miniconda3/etc/profile.d/conda.sh  # Change this to your actual conda path
 conda activate genesis
 
 # Set project root as PYTHONPATH
@@ -9,8 +9,8 @@ export PYTHONPATH=$(pwd)
 
 
 # Read inputs or set defaults
-PORT=${1:-9000}
-POLICY=${2:-robovlm}
+PORT=${1:-8000}
+POLICY=${2:-xvla}
 MODE=${3:-default}  # "default" or "generate"
 
 if [ "$MODE" == "default" ]; then

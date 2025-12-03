@@ -13,6 +13,7 @@ import numpy as np
 import genesis as gs
 import torch
 from torch.nn import functional as F
+from scipy.spatial.transform import Rotation as R
 
 def get_genesis_extrinsics(extrinsics, intrinsics):
     T = np.array(extrinsics)
@@ -297,3 +298,18 @@ def apply_safety_limits(
         print(command, safe_effort_lower, safe_effort_upper)
     res = torch.clip(command, safe_effort_lower, safe_effort_upper)
     return res
+
+def rotate6D_to_euler_xyz(v6: np.ndarray) -> np.ndarray:
+    """Convert 6D rotation representation back to Euler angles (xyz)."""
+    v6 = np.asarray(v6)
+    if v6.shape[-1] != 6:
+        raise ValueError(f"Last dimension must be 6, got {v6.shape[-1]}")
+    a1 = v6[..., 0:5:2]
+    a2 = v6[..., 1:6:2]
+    b1 = a1 / np.linalg.norm(a1, axis=-1, keepdims=True)
+    proj = np.sum(b1 * a2, axis=-1, keepdims=True) * b1
+    b2 = a2 - proj
+    b2 = b2 / np.linalg.norm(b2, axis=-1, keepdims=True)
+    b3 = np.cross(b1, b2)
+    rot_mats = np.stack((b1, b2, b3), axis=-1)
+    return R.from_matrix(rot_mats).as_euler("xyz")
