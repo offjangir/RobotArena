@@ -1,3 +1,0 @@
-move the silver basket to the right burner
-confidence: 0.4
-move the white towel to the left of the orange can
