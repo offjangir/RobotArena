@@ -1,4 +1,4 @@
-base_folder: "./examples/data"
+base_folder: "./data/data"
 robot: "WidowX"
 scene_name: "default2"
 replace_name: "scene1"

@@ -464,6 +464,11 @@ if __name__ == "__main__":
                 default = False
         else:
             continue
+
+        
+        if os.path.exists(os.path.join(output_folder, "default_test",scene_name)):
+            print(f"Skipping {scene_name} as results already exist.")
+            continue
         
         
         data_folder = os.path.join(base_folder, "bridge", scene_name)
@@ -490,22 +495,27 @@ if __name__ == "__main__":
         for task_description in task_lines:
             if "confidence" in task_description:
                 continue
-            for i in range (1):
-                args = SimpleNamespace(
-                    default=default,
-                    robot_args=robot_args,
-                    background=cv2.imread(background),
-                    task_description=task_description,
-                    camera_1_args=camera_1_args,
-                    intrinsics=intrinsics,
-                    extrinsics=extrinsics,
-                    asset_folder=asset_folder,
-                    object_positions=object_positions,
-                    object_properties=physics_properties,
-                    test_id = i,
-                    port = port,
-                    scene_name = scene_name,
-                    output_dir = os.path.join(output_folder, "default_test",scene_name),
-                )
-                p = DefaulTest(args)
-                p.run()
+            try:
+                for i in range (1):
+                    args = SimpleNamespace(
+                        default=default,
+                        robot_args=robot_args,
+                        background=cv2.imread(background),
+                        task_description=task_description,
+                        camera_1_args=camera_1_args,
+                        intrinsics=intrinsics,
+                        extrinsics=extrinsics,
+                        asset_folder=asset_folder,
+                        object_positions=object_positions,
+                        object_properties=physics_properties,
+                        test_id = i,
+                        port = port,
+                        scene_name = scene_name,
+                        output_dir = os.path.join(output_folder, "default_test",scene_name),
+                    )
+                    p = DefaulTest(args)
+                    p.run()
+            except Exception as e:
+                import sys
+                print(f"Error processing task '{task_description}' in scene '{scene_name}': {e}", file=sys.stderr)
+                continue

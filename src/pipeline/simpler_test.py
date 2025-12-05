@@ -13,14 +13,16 @@ import sapien.core as sapien
 from scipy.spatial.transform import Rotation
 from types import SimpleNamespace
 from src.sim.simulator_genesis import SimulatorGenesis, process_surface
-from src.utils.test_utils import get_genesis_extrinsics, reproject_to_plane, find_link_indices, is_grasping_two_finger, apply_safety_limits
+from src.utils.test_utils import get_genesis_extrinsics, reproject_to_plane, find_link_indices, is_grasping_two_finger, apply_safety_limits, rotate6D_to_euler_xyz
 from transforms3d.axangles import mat2axangle
 from transforms3d.euler import euler2axangle, euler2mat, euler2quat, quat2euler
 from transforms3d.quaternions import axangle2quat, mat2quat, quat2axangle, quat2mat,qconjugate 
 from transforms3d.quaternions import qmult, mat2quat, quat2mat
 from transforms3d.quaternions import rotate_vector
 from src.pipeline.default_test import DefaulTest, load_config, str2bool
-
+import json_numpy as json_np
+import collections
+import math
 
 class genesis_object:
     """
@@ -156,7 +158,8 @@ class SimplerTest:
     def reset_model(self):
         requests.post(f"http://localhost:{self.args.port}/reset",
         json={
-            "instruction": self.args.task_description, 
+            "instruction": self.args.task_description,
+            "proprioception": self._get_init_proprioception().tolist(),
         })
     
     def set_task(self, task_description):
@@ -164,29 +167,58 @@ class SimplerTest:
         json={
             "task_description": task_description,
         })
-    
+
     def transform_actions(self, raw_action, action):
-        delta_quat = euler2quat(*raw_action["rotation_delta"])
-        delta_pose  = sapien.Pose(raw_action["world_vector"],delta_quat)
-        cur_ee_pose_at_world = sapien.Pose(self.ee_link.get_pos().cpu().numpy(), self.ee_link.get_quat().cpu().numpy())
-        cur_ee_pose_at_base = self.base_in_world_inv * cur_ee_pose_at_world
-        target_pose = (sapien.Pose(p=cur_ee_pose_at_base.p)* delta_pose * sapien.Pose(p=cur_ee_pose_at_base.p).inv()) * self.prev_ee_pose_at_base
-        self.final_pose = self.base_in_world * target_pose
-        self.prev_ee_pose_at_base = target_pose
+        # 1. Construct the target Pose relative to the Base
+        # We assume raw_action["position"] is [x, y, z] in the robot's base frame
+        # We assume raw_action["rotation"] is [r, p, y] in the robot's base frame
+        target_quat = euler2quat(*raw_action["rotation_delta"]) 
+        target_pose_in_base = sapien.Pose(raw_action["world_vector"], target_quat)
+
+        # 2. Transform this Base-Frame pose into World Frame
+        # Formula: T_world = T_base_to_world * T_target_in_base
+        self.final_pose = self.base_in_world * target_pose_in_base
+
+        # 3. Update the previous pose tracker
+        # Even though we are using absolute inputs now, it is safe to keep this 
+        # updated in case you switch back to deltas later or need it for observation.
+        self.prev_ee_pose_at_base = target_pose_in_base
+
         return self.final_pose
         
     def get_action(self):
+        if self.action_queue:
+            image, rgb = self.get_image()
+            raw_action, action = self.action_queue.popleft()
+            unprocessed_action = self.pred_action_queue.popleft()
+            self._update_proprioception(unprocessed_action)
+            self.transform_actions(raw_action, action)
+            return self.final_pose, action["gripper"], image
         image, rgb = self.get_image()
         res = requests.post(f"http://localhost:{self.args.port}/act",
         json={
-            "instruction": self.task_description,
-            "image": image.tolist(),  
+            # "instruction": self.task_description,
+            "language_instruction": self.task_description,
+            # "image": image.tolist(),
+            "image0": json_np.dumps(image),
+            "proprio": json_np.dumps(self.tracked_proprioception),
+            "domain_id": 0,
+            "steps": 10,
         })
         response = res.json()
-        raw_action = {k: np.array(v) for k, v in response["raw_action"].items()}
-        action = {k: np.array(v) for k, v in response["action"].items()}
+        if "raw_action" in response:
+            raw_action = {k: np.array(v) for k, v in response["raw_action"].items()}
+            action = {k: np.array(v) for k, v in response["action"].items()}
+        else:
+            action_seq = np.array(response["action"], dtype=np.float32)
+            action_seq = [self.xvla_action_parser(np.array(i, dtype=np.float32)) for i in action_seq]
+            self.action_queue.extend(action_seq)
+            raw_action, action = self.action_queue.popleft()
+            action_pred = np.array(self.pred_action_queue.popleft(), dtype=np.float32) # self.pred_action_queue.popleft()
+            # raw_action, action = self.xvla_action_parser(action_seq[0])
+            self._update_proprioception(action_pred)
         self.transform_actions(raw_action, action)
-        return self.final_pose, action["gripper"],image
+        return self.final_pose, action["gripper"], image
         
     def get_image(self):
         rgb, _, seg, _ = self.camera_0.render(rgb=True, depth=True, segmentation=True)
@@ -196,6 +228,58 @@ class SimplerTest:
         background = cv2.bitwise_and(self.target_image, self.target_image, mask=cv2.bitwise_not(mask))
         blended = cv2.add(segmented, background)
         return cv2.cvtColor(blended, cv2.COLOR_BGR2RGB), rgb
+    
+    def _get_init_proprioception(self):
+        #   ee_pose_wrt_base = 
+        # print((self.base_in_world_inv * sapien.Pose(self.ee_link.get_pos().cpu().numpy(), self.ee_link.get_quat().cpu().numpy())).p, self.prev_ee_pose_at_base.p)
+        ee_pose_wrt_base = self.prev_ee_pose_at_base
+        proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, np.array([1, 0, 0, 1, 0, 0, 0])])).to(dtype=torch.float32)
+        # proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, ee_pose_wrt_base.q, np.array([0, 0, 0])])).to(dtype=torch.float32)
+        proprioception = torch.cat([proprioception, torch.zeros_like(proprioception)], dim=-1).numpy().copy()
+        self.tracked_proprioception = proprioception.copy()
+        return proprioception
+    
+    def _update_proprioception(self, action):
+        print("Updating proprioception with action:", action.shape, self.tracked_proprioception.shape)
+        if getattr(self, 'tracked_proprioception', None) is None:
+            self._get_init_proprioception()
+        self.tracked_proprioception[:10] = action[:10]
+
+    def _retrieve_raw_action(self, action):
+        wrapped_action = {
+            "world_vector": action[:3],
+            "rot_axangle": action[3:6],
+            "gripper": action[6],
+        }
+        # 1. Reverse World Vector
+        # Forward: raw * 1
+        # Reverse: wrapped / 1
+        world_vector = wrapped_action["world_vector"]
+        # 2. Reverse Gripper
+        # Forward logic: 1.0 means open, -1.0 means closed
+        # We map 1.0 -> 1 (open) and -1.0 -> 0 (close)
+        gripper_val = wrapped_action["gripper"]
+        # If gripper is effectively 1.0 (or > 0), set to 1.0. Otherwise 0.0.
+        open_gripper_val = 1.0 if gripper_val > 0 else 0.0
+        open_gripper = np.array([open_gripper_val])
+
+        # Construct the dictionary
+        raw_action_retrieved = {
+            "world_vector": world_vector,
+            "rotation_delta": action[3:6],
+            "open_gripper": open_gripper
+        }
+
+        return raw_action_retrieved, wrapped_action
+        
+    def xvla_action_parser(self, action):
+        self.pred_action_queue.append(action)
+        action_final = np.concatenate([
+            action[:3],
+            rotate6D_to_euler_xyz(action[3:9]) + np.array([0, math.pi / 2, 0]),
+            np.array([1 if action[9] < 0.9 else -1])
+        ])
+        return self._retrieve_raw_action(action_final)
 
     def run_default_test(self, default=False):
         imx = []

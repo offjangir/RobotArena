@@ -34,10 +34,10 @@ python src/pipeline/adv_background_test.py \
   --port "$PORT"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
-python src/pipeline/simpler_test.py \
-    --output_dir "$OUT_DIR" \
-    --run_all "$RUNALL" \
-    --port "$PORT"
+# python src/pipeline/simpler_test.py \
+#     --output_dir "$OUT_DIR" \
+#     --run_all "$RUNALL" \
+#     --port "$PORT"
     # --config <config_file> \ # Path to the config file, default to `configs/simpler.yaml`
 
 python src/pipeline/background_test.py \
@@ -47,10 +47,10 @@ python src/pipeline/background_test.py \
   # --config <config_file>  # Optional: defaults to config/default.yaml
   # --background_folder <path_to_background_folder>  # Optional: defaults to ./examples/background
 
-python src/pipeline/camera_test.py \
-  --output_dir "$OUT_DIR" \
-  --run_all "$RUNALL" \
-  --port "$PORT"
+# python src/pipeline/camera_test.py \
+#   --output_dir "$OUT_DIR" \
+#   --run_all "$RUNALL" \
+#   --port "$PORT"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 python src/pipeline/pose_test.py \

@@ -39,10 +39,10 @@ python src/pipeline/background_test.py \
   # --config <config_file>  # Optional: defaults to config/default.yaml
   # --background_folder <path_to_background_folder>  # Optional: defaults to ./examples/background
 
-python src/pipeline/camera_test.py \
-  --output_dir "$OUT_DIR" \
-  --run_all "$RUNALL" \
-  --port "$PORT"
+# python src/pipeline/camera_test.py \
+#   --output_dir "$OUT_DIR" \
+#   --run_all "$RUNALL" \
+#   --port "$PORT"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 python src/pipeline/permute_test.py \
