@@ -27,7 +27,8 @@ echo "Mode: $MODE → Output Dir: $OUT_DIR"
 python src/pipeline/default_test.py \
   --output_dir "$OUT_DIR" \
   --run_all true \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 # Notes:

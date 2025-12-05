@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('--run_all', type=str2bool, default=False, help='Run all scenes or a specific one')
     parser.add_argument('--output_dir', type=str, default="./results", help='Output directory for results')
     parser.add_argument('--port', type=int, default=9010, help='Port for the server')
+    parser.add_argument('--vla', type=str, required=True, help='Name of the VLA model')
     
     args = parser.parse_args()
     robot_args = {
@@ -45,6 +46,7 @@ if __name__ == "__main__":
     base_folder = config['base_folder']
     scene_name = config['scene_name']
     
+    model_name = args.vla
     port = args.port
     output_dir = args.output_dir
     run_default = False
@@ -67,6 +69,10 @@ if __name__ == "__main__":
             else:
                 default = False
         else:
+            continue
+
+        if os.path.exists(os.path.join(output_dir, "permute_test", scene_name)):
+            print(f"Skipping {scene_name} as results already exist.")
             continue
         
         data_folder = os.path.join(base_folder, "bridge", scene_name)
@@ -110,6 +116,7 @@ if __name__ == "__main__":
                     scene_name = scene_name,
                     port = port,
                     output_dir = os.path.join(output_dir, "permute_test", scene_name),
+                    model_name = model_name,
                 )
                 
                 if i != 0:

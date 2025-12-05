@@ -16,6 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('--background_folder', type=str, default="./examples/background", help='Path to the background folder')
     parser.add_argument('--output_dir', type=str, default="./results", help='Output directory for results')
     parser.add_argument('--port', type=int, default=9010, help='Port for the server')
+    parser.add_argument('--vla', type=str, required=True, help='Name of the VLA model')
     
     args = parser.parse_args()
     robot_args = {
@@ -37,7 +38,9 @@ if __name__ == "__main__":
     
     port = args.port
     output_dir = args.output_dir
-    background_folder = args.background_folder  
+    background_folder = args.background_folder
+    model_name = args.vla
+
     run_default = False
     if ("default" in output_dir):
         run_default = True
@@ -58,6 +61,11 @@ if __name__ == "__main__":
                 default = False
         else:
             continue
+        
+        if os.path.exists(os.path.join(output_dir, "background_test", scene_name)):
+            print(f"Skipping {scene_name} as results already exist.")
+            continue
+
         data_folder = os.path.join(base_folder, "bridge", scene_name)
         asset_folder = os.path.join(base_folder, "assets", scene_name)
         background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
@@ -100,6 +108,7 @@ if __name__ == "__main__":
                     port = port,
                     scene_name = scene_name,
                     output_dir = os.path.join(output_dir, "background_test", scene_name),
+                    model_name = model_name,
                 )
                 
                 for alpha, bc_petrub in enumerate(pngs):

@@ -24,14 +24,16 @@ echo "Mode: $MODE → Output Dir: $OUT_DIR"
 python src/pipeline/default_test.py \
   --output_dir "$OUT_DIR" \
   --run_all "$RUNALL" \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 
 python src/pipeline/adv_background_test.py \
   --output_dir "$OUT_DIR" \
   --run_all "$RUNALL" \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 # python src/pipeline/simpler_test.py \
@@ -43,18 +45,21 @@ python src/pipeline/adv_background_test.py \
 python src/pipeline/background_test.py \
   --output_dir "$OUT_DIR" \
   --run_all "$RUNALL" \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
   # --background_folder <path_to_background_folder>  # Optional: defaults to ./examples/background
 
 # python src/pipeline/camera_test.py \
 #   --output_dir "$OUT_DIR" \
 #   --run_all "$RUNALL" \
-#   --port "$PORT"
+#   --port "$PORT" \
+#   --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 python src/pipeline/pose_test.py \
   --output_dir "$OUT_DIR" \
   --run_all "$RUNALL" \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
