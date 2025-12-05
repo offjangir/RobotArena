@@ -9,8 +9,8 @@ export PYTHONPATH=$(pwd)
 
 
 # Read inputs or set defaults
-PORT=${1:-8000}
-POLICY=${2:-xvla}
+PORT=${1:-9000}
+POLICY=${2:-open_pi_zero}
 MODE=${3:-default}  # "default" or "generate"
 
 if [ "$MODE" == "default" ]; then
