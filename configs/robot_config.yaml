@@ -14,26 +14,17 @@ WidowX:
   # quat: [0.707, 0.0, 0.0, 0.0]
   quat: [0.0, 0.0, 0.0, 1.0]   # Same here
   
-
 franka:
   name: "franka"
   # path: "urdf/panda_bullet/panda.urdf"
-  path: "xml/franka_emika_panda/panda.xml"
-  # ee_link: "panda_hand"
-  ee_link: "hand"
+  # path: "xml/franka_emika_panda/panda.xml"
+  path: "./utils/assets/franka_emika_panda/panda_2f85.xml"
+  ee_link: "panda_hand"
   pc_idxs: 4
   # pc_idxs: [1]
-  pos : [0.149, 0.028, 0.874]    # Use square brackets for a proper list/tuple
+  pos: [  0.127, 0.060, 0.870] 
   quat: [0.0, 0.0, 0.0, 1.0]   # Same here
-  position:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  quaternion:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
+
 
 ur5:
   name: "ur5"
