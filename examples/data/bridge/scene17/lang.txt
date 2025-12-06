@@ -1,1 +1,0 @@
-move blue cloth from center to right bottom corner
