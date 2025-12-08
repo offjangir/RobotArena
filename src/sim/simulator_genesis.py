@@ -157,9 +157,9 @@ class SimulatorGenesis:
         euler = robot_config[self.robot_name]["quat"]
         if ext == ".xml":
             self.robot = self.scene.add_entity(
-                gs.morphs.MJCF(file=robot_path, 
-                               pos= pos,
-                               quat=euler,
+                gs.morphs.MJCF(file=robot_path
+                            #    pos= pos,
+                            #    quat=euler,
                                )
             )
         elif ext == ".urdf":

@@ -13,7 +13,7 @@ import sapien.core as sapien
 from scipy.spatial.transform import Rotation
 from types import SimpleNamespace
 from src.sim.simulator_genesis import SimulatorGenesis
-from src.utils.test_utils import get_genesis_extrinsics, reproject_to_plane, find_link_indices, is_grasping_two_finger, apply_safety_limits
+from src.utils.test_utils import get_genesis_extrinsics, reproject_to_plane, find_link_indices, is_grasping_two_finger, apply_safety_limits, rotate6D_to_euler_xyz
 from transforms3d.axangles import mat2axangle
 from transforms3d.euler import euler2axangle, euler2mat, euler2quat, quat2euler
 from transforms3d.quaternions import axangle2quat, mat2quat, quat2axangle, quat2mat,qconjugate 
@@ -25,6 +25,9 @@ import base64
 MIN_OPENING = 0.01
 MAX_OPENING = 0.8
 OPENING_DIRECTION = -1
+import json_numpy as json_np
+import math
+import collections
 
 def quat_from_axis_angle(axis, angle):
     axis = axis / np.linalg.norm(axis)
@@ -49,6 +52,8 @@ class DefaulTest:
     def __init__(self, args, **kwargs):
         super().__init__(**kwargs)
         self.args = args
+        self.action_queue = collections.deque()
+        self.pred_action_queue = collections.deque()
     
     def setup(self):
         self.simulator = SimulatorGenesis(
@@ -183,6 +188,7 @@ class DefaulTest:
         self.base_in_world_inv =  sapien.Pose(self.simulator.robot.get_link("link0").get_pos().cpu().numpy(), self.simulator.robot.get_link("link0").get_quat().cpu().numpy()).inv()
         self.base_in_world =sapien.Pose(self.simulator.robot.get_link("link0").get_pos().cpu().numpy(), self.simulator.robot.get_link("link0").get_quat().cpu().numpy())
         self.prev_ee_pose_at_base = self.base_in_world_inv * self.prev_ee_pose_at_world
+        self.prev_gripper = np.array([0.0])
         
     def reset_model(self):
         requests.post(f"http://localhost:{self.port}/reset",
@@ -195,8 +201,33 @@ class DefaulTest:
         json={
             "task_description": task_description,
         })
+
+    def prepare_action_payload(self, image):
+        if self.args.model_name == "xvla":
+            payload = {
+                "language_instruction": self.task_description,
+                "image0": json_np.dumps(image),
+                "proprio": json_np.dumps(self._get_xvla_proprioception()),
+                "domain_id": 0,
+                "steps": 10,
+            }
+        elif self.args.model_name == "open_pi_zero":
+            payload = {
+                "instruction": self.task_description,
+                "image": json_np.dumps(image),
+                "proprio": json_np.dumps(self._get_openpi_proprioception()),
+            }
+        else:
+            _, buffer = cv2.imencode('.jpg', image)
+            jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+            payload = {
+                "instruction": self.task_description,
+                "image": jpg_as_text,  
+            }
+        
+        return payload
     
-    def transform_actions(self, raw_action, action):
+    def transform_actions_delta(self, raw_action, action):
         delta_quat = euler2quat(*raw_action["rotation_delta"])
         delta_pose  = sapien.Pose(raw_action["world_vector"],delta_quat)
         cur_ee_pose_at_world = sapien.Pose(self.ee_link.get_pos().cpu().numpy(), self.ee_link.get_quat().cpu().numpy())
@@ -204,25 +235,41 @@ class DefaulTest:
         target_pose = (sapien.Pose(p=cur_ee_pose_at_base.p)* delta_pose * sapien.Pose(p=cur_ee_pose_at_base.p).inv()) * self.prev_ee_pose_at_base
         self.final_pose = self.base_in_world * target_pose
         self.prev_ee_pose_at_base = target_pose
+        self.prev_gripper = action["gripper"]
         return self.final_pose
+
+    def transform_actions_exact(self, raw_action, action):
+        target_quat = euler2quat(*raw_action["rotation_delta"]) 
+        target_pose_in_base = sapien.Pose(raw_action["world_vector"], target_quat)
+        self.final_pose = self.base_in_world * target_pose_in_base
+        self.prev_ee_pose_at_base = target_pose_in_base
+        return self.final_pose
+
+    def transform_actions(self, raw_action, action):
+        if self.args.model_name == "xvla":
+            return self.transform_actions_exact(raw_action, action)
+        else:
+            return self.transform_actions_delta(raw_action, action)
         
     def get_action(self):
         image, rgb = self.get_image()
         start_time = time.time()
-        _, buffer = cv2.imencode('.jpg', image)
-        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
         res = requests.post(f"http://localhost:{self.port}/act",
-        json={
-            "instruction": self.task_description,
-            "image": jpg_as_text,  
-        })
+        json=self.prepare_action_payload(image))
         response = res.json()
-        raw_action = {k: np.array(v) for k, v in response["raw_action"].items()}
-        action = {k: np.array(v) for k, v in response["action"].items()}
+        if "raw_action" in response:
+            raw_action = {k: np.array(v) for k, v in response["raw_action"].items()}
+            action = {k: np.array(v) for k, v in response["action"].items()}
+        else:
+            action_seq = np.array(response["action"], dtype=np.float32)
+            action_seq = [self.action_parser(np.array(i, dtype=np.float32)) for i in action_seq]
+            self.action_queue.extend(action_seq)
+            raw_action, action = self.action_queue.popleft()
+            if self.args.model_name == "xvla":
+                action_pred = np.array(self.pred_action_queue.popleft(), dtype=np.float32)
+                self._update_xvla_proprioception(action_pred)
         self.transform_actions(raw_action, action)
-        # self.final_pose = None
-        # action["gripper"] = None
-        return self.final_pose, action["gripper"],image
+        return self.final_pose, action["gripper"], image
         
     def get_image(self):
         rgb, _, seg, _ = self.camera_0.render(rgb=True, depth=True, segmentation=True)
@@ -232,6 +279,77 @@ class DefaulTest:
         background = cv2.bitwise_and(self.target_image, self.target_image, mask=cv2.bitwise_not(mask))
         blended = cv2.add(segmented, background)
         return cv2.cvtColor(blended, cv2.COLOR_BGR2RGB), rgb
+    
+    def _get_openpi_proprioception(self):
+        ee_pose_wrt_base = self.prev_ee_pose_at_base
+        return np.concatenate([ee_pose_wrt_base.p, ee_pose_wrt_base.q, self.prev_gripper])
+    
+    def _init_xvla_proprioception(self):
+        ee_pose_wrt_base = self.prev_ee_pose_at_base
+        proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, np.array([1, 0, 0, 1, 0, 0, 0])])).to(dtype=torch.float32)
+        # proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, ee_pose_wrt_base.q, np.array([0, 0, 0])])).to(dtype=torch.float32)
+        proprioception = torch.cat([proprioception, torch.zeros_like(proprioception)], dim=-1).numpy().copy()
+        self.xvla_proprioception = proprioception.copy()
+        return proprioception
+    
+    def _update_xvla_proprioception(self, action):
+        self.xvla_proprioception[:10] = action[:10]
+        return self.xvla_proprioception
+
+    def _get_xvla_proprioception(self):
+        if getattr(self, 'xvla_proprioception', None) is None:
+            self._init_xvla_proprioception()
+        return self.xvla_proprioception
+
+    def _xvla_retrieve_raw_action(self, action):
+        wrapped_action = {
+            "world_vector": action[:3],
+            "rot_axangle": action[3:6],
+            "gripper": [action[6]],
+        }
+        world_vector = wrapped_action["world_vector"]
+        gripper_val = wrapped_action["gripper"][0]
+        open_gripper_val = 1.0 if gripper_val > 0 else 0.0
+        open_gripper = np.array([open_gripper_val])
+
+        raw_action_retrieved = {
+            "world_vector": world_vector,
+            "rotation_delta": action[3:6],
+            "open_gripper": open_gripper
+        }
+
+        return raw_action_retrieved, wrapped_action
+    
+    def _openpi_action_parser(self, action):
+        raw_action = {
+            "world_vector": action[:3],
+            "rotation_delta": action[3:6],
+            "open_gripper": action[6],
+        }
+        wrapped_action = {
+            "world_vector": action[:3],
+            "rot_axangle": action[3:6],
+            "gripper": [raw_action["open_gripper"]]
+        }
+        return raw_action, wrapped_action
+    
+    def _xvla_action_parser(self, action):
+        action = action * 10
+        self.pred_action_queue.append(action)
+        action_final = np.concatenate([
+            action[:3],
+            rotate6D_to_euler_xyz(action[3:9]) + np.array([0, math.pi / 2, 0]),
+            np.array([1 if action[9] < 0.9 else -1])
+        ])
+        return self._xvla_retrieve_raw_action(action_final)
+
+    def action_parser(self, action):
+        if self.args.model_name == "xvla":
+            return self._xvla_action_parser(action)
+        elif self.args.model_name == "open_pi_zero":
+            return self._openpi_action_parser(action)
+        else:
+            raise NotImplementedError(f"Action parser not implemented for model {self.args.model_name}")
 
     def run_default_test(self):
         imx = []
@@ -348,6 +466,8 @@ if __name__ == "__main__":
     parser.add_argument('--run_all', type=str2bool, default=False, help='Run all tests')
     parser.add_argument('--output_dir', type=str, default="./results_debug", help='Output directory for results')
     parser.add_argument('--port', type=int, default=9050, help='Port for the server')
+    parser.add_argument('--vla', type=str, required=True, help='Name of the VLA model')
+    parser.add_argument('--eval_name', type=str, default='droid', help='The name of the data to test on: droid or rh20t')
     args = parser.parse_args()
     robot_args = {
         "name": "franka",
@@ -362,17 +482,24 @@ if __name__ == "__main__":
         "fov": 80,
     }
 
+    eval_name_path_map = {
+        "droid": "DROID",
+        "rh20t": "scene"
+    }
+
     config = load_config(args.config)
     base_folder = config['base_folder']
     scene_name = config['scene_name']
     output_folder = args.output_dir
     port = args.port
+    model_name = args.vla
+    eval_name = args.eval_name
     
     run_default = False
     if "default" in output_folder:
         run_default = True
     if args.run_all:
-        scene_lists = os.listdir(os.path.join(base_folder, "DROID"))
+        scene_lists = os.listdir(os.path.join(base_folder, eval_name_path_map[args.eval_name]))
     else:
         scene_lists = [scene_name]
 
@@ -387,15 +514,12 @@ if __name__ == "__main__":
                 continue
         
         elif scene_name.startswith("task") or scene_name.startswith("droid"):
-            if run_default:
-                continue
-            else:
-                default = False
+            default = False
         else:
             continue
         
         
-        data_folder = os.path.join(base_folder, "DROID", scene_name)
+        data_folder = os.path.join(base_folder, eval_name_path_map[eval_name], scene_name)
         asset_folder = os.path.join(base_folder, "assets", scene_name)
         background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
 
@@ -476,6 +600,7 @@ if __name__ == "__main__":
                     port = port,
                     scene_name = scene_name,
                     output_dir = os.path.join(output_folder, "default_test",scene_name),
+                    model_name = model_name,
                 )
                 p = DefaulTest(args)
                 p.run()

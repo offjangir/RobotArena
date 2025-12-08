@@ -1,8 +1,7 @@
-*/__pycache__/
-*.pyc
+# Ignore Evaluation Output videos
 *_test/
+*.mp4
 
-slurm_scripts/
 # Ignore examples/data directory
 examples/data/
 
@@ -10,6 +9,7 @@ examples/data/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Python virtual environments
 env/

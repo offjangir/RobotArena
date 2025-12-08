@@ -1,3 +1,3 @@
-base_folder: "/data/user_data/yjangir/yidi/scene/scene_generation/data"
+base_folder: "./data/data"
 robot: "franka"
-scene_name: "task_0003_user_0020_scene_0003_cfg_0005"
+scene_name: "droid2"

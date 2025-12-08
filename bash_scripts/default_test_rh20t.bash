@@ -29,7 +29,7 @@ python src/pipeline/default_test_droid.py \
   --run_all true \
   --port "$PORT" \
   --vla "$POLICY" \
-  --eval_name "droid"
+  --eval_name "rh20t"
   # --config <config_file>  # Optional: defaults to config/default1.yaml
 
 # Notes:
