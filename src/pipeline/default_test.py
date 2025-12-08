@@ -429,7 +429,7 @@ class DefaulTest:
         except:
             import sys
             import traceback
-            print(f"Error processing task '{task_description}' in scene '{scene_name}': {traceback.format_exc()}", file=sys.stderr)
+            print(f"Error processing task '{self.task_description}' in scene '{self.args.scene_name}': {traceback.format_exc()}", file=sys.stderr)
         gs.destroy()
 
 
