@@ -293,7 +293,7 @@ cd open-pi-zero
 bash slurm/eval_simpler_bridge_server.sh
 ```
 
-* open-pi-zero server is default to port 9040
+* open-pi-zero server is default to port `9040`
 
 ## X-VLA Server
 
@@ -308,7 +308,7 @@ python deploy.py \
     --port 9050
 ```
 
-* X-VLA server is default to port 9050
+* X-VLA server is default to port `9050`
 
 
 
