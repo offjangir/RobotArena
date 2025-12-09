@@ -8,6 +8,8 @@ Our framework leverages custom-built simulated environments—called **Robot Are
 - **RoboVLM**
 - **Octo**
 - **SpatialVLA**
+- **open-pi-zero**
+- **X-VLA**
 
 ---
 
@@ -17,8 +19,10 @@ Our framework leverages custom-built simulated environments—called **Robot Are
   - [1. CogAct](#1-environment-setup-for-cogact)
   - [2. RoboVLM](#2-environment-setup-for-robovlm)
   - [3. SpatialVLA & Octo](#3-environment-setup-for-spatialvla-and-octo)
-  - [4. Genesis](#4-environment-setup-for-genesis)
-  - [5. Gemini](#5-environment-setup-for-gemini)
+  - [4. open-pi-zero](#4-environment-setup-for-open-pi-zero)
+  - [5. X-VLA](#5-environment-setup-for-x-vla)
+  - [6. Genesis](#6-environment-setup-for-genesis)
+  - [7. Gemini](#7-environment-setup-for-gemini)
 
 - [🚀 Running Evaluation](#running-evaluation)
   - **Policy Servers**
@@ -26,6 +30,8 @@ Our framework leverages custom-built simulated environments—called **Robot Are
     - [Octo Server](#octo-server)
     - [SpatialVLA Server](#spatialvla-server)
     - [CogAct Server](#cogact-server)
+    - [open-pi-zero Server](#open-pi-zero-server)
+    - [X-VLA Server](#x-vla-server)
   - [📁 Example Data Structure](#example-data-structure)
   - [📜 Evaluation Scripts](#evaluation-scripts)
 
@@ -110,7 +116,33 @@ pip install "transformers == 4.47.0"
 ```
 </details>
 
-### 4. Environment Setup for Genesis
+### 4. Environment Setup for open-pi-zero
+
+<details>
+<summary>environment open-pi-zero (click to expand)</summary>
+
+```bash
+cd ./open-pi-zero
+uv sync
+uv pip install uvicorn fastapi json-numpy
+source scripts/set_path.sh
+```
+</details>
+
+### 5. Environment Setup for X-VLA
+
+<details>
+<summary>environment X-VLA (click to expand)</summary>
+
+```bash
+conda create -n XVLA python=3.10 -y
+conda activate XVLA
+cd ./X-VLA
+pip install -r requirements.txt
+```
+</details>
+
+### 6. Environment Setup for Genesis
 
 
 <details>
@@ -129,7 +161,7 @@ pip install pyyaml sapien
 ```
 </details>
 
-### 5. Environment Setup for Gemini
+### 7. Environment Setup for Gemini
 
 
 <details>
@@ -236,6 +268,48 @@ python src/server/server_cogact.py
 
 * CogACT server is default to port `9030`
 
+### open-pi-zero Server
+
+<details>
+<summary><b>Details</b> on downloading from Hugginface</summary>
+
+* [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) must be downloaded
+
+* You can test `google/paligemma-3b-pt-224` with: 
+
+```bash
+cd open-pi-zero
+uv run src/model/vla/pizero.py --text_only --load_pretrained_weights --use_bf16
+```
+
+* The author has provided these cehckpoints on Hugginface: [Bridge-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_uniform_step19296_2024-12-26_22-31_42.pt) | [Bridge-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_beta_step19296_2024-12-26_22-30_42.pt) | [Fractal-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_uniform_step29576_2024-12-31_22-26_42.pt) | [Fractal-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_beta_step29576_2024-12-29_13-10_42.pt)
+
+* Remember to confirm the checkpoint location in `slurm/eval_simpler_bridge_server.sh` is correct.
+
+</details>
+
+```bash
+cd open-pi-zero
+bash slurm/eval_simpler_bridge_server.sh
+```
+
+* open-pi-zero server is default to port 9040
+
+## X-VLA Server
+
+* Activate conda environment to start the server
+
+```bash
+conda activate XVLA
+cd X-VLA
+python deploy.py \
+    --model_path 2toINF/X-VLA-WidowX \
+    --host 0.0.0.0 \
+    --port 9050
+```
+
+* X-VLA server is default to port 9050
+
 
 
 ## Example Data Structure
@@ -260,6 +334,8 @@ We provide several evaluation scripts to test the performance of the policy in d
 
 ```bash
 bash bash_scripts/default_test.bash
+bash bash_scripts/default_test_droid.bash
+bash bash_scripts/default_test_rh20t.bash
 bash bash_scripts/background_test.bash
 bash bash_scripts/adv_background_test.bash
 bash bash_scripts/camera_test.bash
@@ -299,6 +375,8 @@ The test is performed on both the default scene (e.g., `default1`) and the gener
 | RoboVLM    | `bash bash_scripts/default_test.bash 9000 robovlm generate` |
 | Octo       | `bash bash_scripts/default_test.bash 9010 octo generate` |
 | CogAct     | `bash bash_scripts/default_test.bash 9030 cogact generate` |
+| open-pi-zero| `bash bash_scripts/default_test.bash 9040 open_pi_zero generate` |
+| X-VLA      | `bash bash_scripts/default_test.bash 9050 xvla generate` |
 
  
 If you want to run the test on the default scenes, you can change from `generate` to `default` in the command.
@@ -460,7 +538,7 @@ bash bash_scripts/GVL.bash
 ```
 
 Please use the bash script `bash_scripts/GVL.bash` for this. In GVL.bash, you can modify the following arguments to customize the evaluation:
-* use `policy` to specify the policy you want to use, e.g., `spatial`, `robovlm`, `cogact`, `octo`.
+* use `policy` to specify the policy you want to use, e.g., `spatial`, `robovlm`, `cogact`, `octo`, `open_pi_zero`, `xvla`.
 * use `variant` to specify the variant of the test you want to run, e.g., `background_test`, `default_test`, `camera_test`, etc.
 * sepecify in `inference` the path to the folder where you have saved the results of the test you want to evaluate, e.g., `./generate_test/$policy/$variant/` for the generated scenes or `./default_test/$policy/$variant/` for the default scenes.
 * put your Gemini API key in `--key` argument in the bash script.
