@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import trimesh
 from configs import robot_config
+from pathlib import Path
 
 def process_surface(surface):
     match surface:
@@ -46,6 +47,7 @@ class SimulatorGenesis:
         self.show_viewer = show_viewer
         self.robot_addition = add_robot
         self.asset_ID = {}
+        self.assets_entity = {}
     
     def get_asset_ID(self):
         return self.asset_ID
@@ -91,6 +93,7 @@ class SimulatorGenesis:
             physics["friction"],
             )
         self.asset_ID[scale] = asset
+        self.assets_entity[physics["object_name"] if physics and "object_name" in physics else Path(asset_path).stem] = asset[0]
         return scale
 
     def set_scene(self, default, special_light = False):

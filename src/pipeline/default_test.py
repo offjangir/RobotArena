@@ -82,7 +82,7 @@ class DefaulTest:
                 physics = self.args.object_properties[count]
             else:
                 physics = None
-            object_name = physics["object_name"]
+            object_name = physics["object_name"] if physics and "object_name" in physics else key
             if "emission" in attributes:
                 asset = self.simulator.scene.add_entity(
                     gs.morphs.Box(
@@ -93,6 +93,7 @@ class DefaulTest:
                             emissive=attributes["emission"]
                         )
                 )
+                self.simulator.assets_entity[object_name] = asset
                 if "target" in object_name:
                     self.target_asset = asset
                     self.target_rotation = attributes["rotation"]
@@ -115,6 +116,7 @@ class DefaulTest:
                                 convexify =True,
                         ),
                     )
+                    self.simulator.assets_entity[object_name] = asset
                     if "target" in object_name:
                         self.target_asset = asset
                         self.target_rotation = attributes["rotation"]
@@ -340,6 +342,9 @@ class DefaulTest:
     def run_default_test(self):
         imx = []
         results = {}
+        base_states = []
+        world_states = []
+        object_states = {}
         reward = 0
         print("Running Test on task:", self.args.task_description)
         self.set_task(self.args.task_description) 
@@ -351,6 +356,17 @@ class DefaulTest:
         rigid = self.simulator.scene.sim.rigid_solver
         
         for i in range(60):
+            base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper])]))
+            world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper])]))
+            for key in self.simulator.assets_entity.keys():
+                if key not in object_states:
+                    object_states[key] = []
+                asset = self.simulator.assets_entity[key]
+                pos = asset.get_pos().cpu().numpy()
+                quat = asset.get_quat().cpu().numpy()
+                vel = asset.get_vel().cpu().numpy()
+                ang = asset.get_ang().cpu().numpy()
+                object_states[key].append(np.concatenate([pos, quat, vel, ang]))
             pose, gripper, image = self.get_action()
             des_q = self.simulator.robot.inverse_kinematics(
                 link=self.ee_link,
@@ -412,6 +428,9 @@ class DefaulTest:
         folder = self.output_dir
         os.makedirs(folder, exist_ok=True)
         gs.tools.animate(imx, os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.mp4"), fps=5)
+        world_states = np.array(world_states)
+        base_states = np.array(base_states)
+        np.savez(os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.npz"), world=world_states, base=base_states, **object_states)
         
 
     def reward_reaching_cube(self, ee_link, asset):
@@ -429,7 +448,7 @@ class DefaulTest:
         except:
             import sys
             import traceback
-            print(f"Error processing task '{self.task_description}' in scene '{self.args.scene_name}': {traceback.format_exc()}", file=sys.stderr)
+            print(f"Error processing task '{self.args.task_description}' in scene '{self.args.scene_name}': {traceback.format_exc()}", file=sys.stderr)
         gs.destroy()
 
 
