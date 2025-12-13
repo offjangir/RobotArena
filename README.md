@@ -158,6 +158,7 @@ conda activate genesis
 pip install -e .
 pip3 install torch torchvision
 pip install pyyaml sapien
+pip install json-numpy
 ```
 </details>
 
