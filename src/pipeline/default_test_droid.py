@@ -525,7 +525,7 @@ if __name__ == "__main__":
     if args.run_all:
         scene_lists = os.listdir(os.path.join(base_folder, eval_name_path_map[args.eval_name]))
     else:
-        scene_lists = [scene_name]
+        scene_lists = [scene_name] if type(scene_name) is str else scene_name
 
     print(scene_lists) 
     print(len(scene_lists))
