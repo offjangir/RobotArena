@@ -355,7 +355,11 @@ class DefaulTest:
         link_robot = np.array([ self.simulator.robot.get_link("ee_gripper_link").idx], dtype=gs.np_int)
         rigid = self.simulator.scene.sim.rigid_solver
         
-        for i in range(60):
+        for i in range(65):
+            if i < 5:
+                for _ in range(60):
+                    self.simulator.step()
+                continue
             base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper])]))
             world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper])]))
             for key in self.simulator.assets_entity.keys():
@@ -387,10 +391,10 @@ class DefaulTest:
                         welded = False
                         rigid.delete_weld_constraint(link_obj, link_robot)
                 self.simulator.robot.control_dofs_force(np.array([10, 10]), dofs_idx_local=np.arange(6,8))
-                for i in range(60):
+                for _ in range(60):
                     self.simulator.scene.step()
             else:
-                for i in range(60):
+                for _ in range(60):
                     self.simulator.robot.control_dofs_force(
                         apply_safety_limits(
                             torch.tensor([-10,-10]),

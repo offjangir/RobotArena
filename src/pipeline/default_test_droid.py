@@ -369,7 +369,11 @@ class DefaulTest:
         link_robot = np.array([ self.simulator.robot.get_link("base").idx], dtype=gs.np_int)
         rigid = self.simulator.scene.sim.rigid_solver
         
-        for i in range(150):
+        for i in range(155):
+            if i < 5:
+                for _ in range(10):
+                    self.simulator.step()
+                continue
             base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper])]))
             world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper])]))
             for key in self.simulator.assets_entity.keys():
@@ -389,7 +393,7 @@ class DefaulTest:
             )
             # Gripper positions are in [0.0, 1.0], with 0.0 corresponding to fully open and 1.0 corresponding to fully closed.
             self.simulator.robot.control_dofs_position(des_q[:7], dofs_idx_local=np.arange(7))
-            for i in range(10):
+            for _ in range(10):
                 compute(torch.tensor([[gripper]], dtype=torch.float32), self.simulator.robot, np.arange(7,9))
                 self.simulator.step()
             # for _ in range(5):
