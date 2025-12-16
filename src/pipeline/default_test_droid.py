@@ -245,6 +245,7 @@ class DefaulTest:
         target_pose_in_base = sapien.Pose(raw_action["world_vector"], target_quat)
         self.final_pose = self.base_in_world * target_pose_in_base
         self.prev_ee_pose_at_base = target_pose_in_base
+        self.prev_gripper = action["gripper"]
         return self.final_pose
 
     def transform_actions(self, raw_action, action):
@@ -370,22 +371,23 @@ class DefaulTest:
         rigid = self.simulator.scene.sim.rigid_solver
         
         for i in range(155):
-            if i < 5:
-                for _ in range(10):
-                    self.simulator.step()
-                continue
-            base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper]) if type(self.prev_gripper) is float else self.prev_gripper]))
-            world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper]) if type(self.prev_gripper) is float else self.prev_gripper]))
-            for key in self.simulator.assets_entity.keys():
-                if key not in object_states:
-                    object_states[key] = []
-                asset = self.simulator.assets_entity[key]
-                pos = asset.get_pos().cpu().numpy()
-                quat = asset.get_quat().cpu().numpy()
-                vel = asset.get_vel().cpu().numpy()
-                ang = asset.get_ang().cpu().numpy()
-                object_states[key].append(np.concatenate([pos, quat, vel, ang]))
-            pose, gripper, image = self.get_action()
+            if i >= 5:
+                pose, gripper, image = self.get_action()
+                base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper]) if np.isscalar(self.prev_gripper) else self.prev_gripper]))
+                world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper]) if np.isscalar(self.prev_gripper) else self.prev_gripper]))
+                for key in self.simulator.assets_entity.keys():
+                    if key not in object_states:
+                        object_states[key] = []
+                    asset = self.simulator.assets_entity[key]
+                    pos = asset.get_pos().cpu().numpy()
+                    quat = asset.get_quat().cpu().numpy()
+                    vel = asset.get_vel().cpu().numpy()
+                    ang = asset.get_ang().cpu().numpy()
+                    object_states[key].append(np.concatenate([pos, quat, vel, ang]))
+            else:
+                pose = self.prev_ee_pose_at_world
+                gripper = 0.0
+                image = None
             des_q = self.simulator.robot.inverse_kinematics(
                 link=self.ee_link,
                 pos=np.array(pose.p),
