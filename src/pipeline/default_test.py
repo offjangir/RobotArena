@@ -360,8 +360,8 @@ class DefaulTest:
                 for _ in range(60):
                     self.simulator.step()
                 continue
-            base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper])]))
-            world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper])]))
+            base_states.append(np.concatenate([self.prev_ee_pose_at_base.p, self.prev_ee_pose_at_base.q, np.array([self.prev_gripper]) if type(self.prev_gripper) is float else self.prev_gripper]))
+            world_states.append(np.concatenate([self.prev_ee_pose_at_world.p, self.prev_ee_pose_at_world.q, np.array([self.prev_gripper]) if type(self.prev_gripper) is float else self.prev_gripper]))
             for key in self.simulator.assets_entity.keys():
                 if key not in object_states:
                     object_states[key] = []
