@@ -57,84 +57,88 @@ if __name__ == "__main__":
     else:
         scene_lists = [scene_name] if type(scene_name) is str else scene_name
     for scene_name in scene_lists:
-        
-        if scene_name.startswith("default"):
-            if run_default:
-                default = True
+        try:
+            if scene_name.startswith("default"):
+                if run_default:
+                    default = True
+                else:
+                    continue
+            elif scene_name.startswith("scene"):
+                if run_default:
+                    continue
+                else:
+                    default = False
             else:
                 continue
-        elif scene_name.startswith("scene"):
-            if run_default:
+
+            if os.path.exists(os.path.join(output_dir, "permute_test", scene_name)):
+                print(f"Skipping {scene_name} as results already exist.")
                 continue
+            
+            data_folder = os.path.join(base_folder, "bridge", scene_name)
+            asset_folder = os.path.join(base_folder, "assets", scene_name)
+            background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
+            extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
+            intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
+            
+            with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
+                object_positions = json.load(f)
+            
+            if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
+                with open(os.path.join(data_folder, "masks","result.json"), 'r') as f:
+                    physics_properties = json.load(f)
             else:
-                default = False
-        else:
-            continue
-
-        if os.path.exists(os.path.join(output_dir, "permute_test", scene_name)):
-            print(f"Skipping {scene_name} as results already exist.")
-            continue
-        
-        data_folder = os.path.join(base_folder, "bridge", scene_name)
-        asset_folder = os.path.join(base_folder, "assets", scene_name)
-        background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
-        extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
-        intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
-        
-        with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
-            object_positions = json.load(f)
-        
-        if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
-            with open(os.path.join(data_folder, "masks","result.json"), 'r') as f:
-                physics_properties = json.load(f)
-        else:
-            with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
-                physics_properties = json.load(f)
-        
-        task_path = os.path.join(data_folder, "lang.txt")
-        with open(task_path, 'r') as file:
-            task_lines = file.readlines()
-        task_lines = [line.strip() for line in task_lines]
-        
-        for task_description in task_lines:
-            if "confidence" in task_description:
-                continue
-            background_image = cv2.imread(background)
-            for i in range (len(object_positions)):
-                args = SimpleNamespace(
-                    default=default,
-                    robot_args=robot_args,
-                    background = background_image,
-                    task_description=task_description,
-                    camera_1_args=camera_1_args,
-                    intrinsics=intrinsics,
-                    extrinsics=extrinsics,
-                    asset_folder=asset_folder,
-                    object_positions=object_positions,
-                    object_properties=physics_properties,
-                    test_id = 0,
-                    scene_name = scene_name,
-                    port = port,
-                    output_dir = os.path.join(output_dir, "permute_test", scene_name),
-                    model_name = model_name,
-                )
-                
-                if i != 0:
-                    random.seed(i)
-                    keys = list(object_positions.keys())
-                    values = list(object_positions.values())
-                    translations = [value['translation'] for value in values]
-                    xy_list = [t[:2] for t in translations]
-                    z_list = [t[2] for t in translations]
-
-                    random.shuffle(xy_list)
+                with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
+                    physics_properties = json.load(f)
+            
+            task_path = os.path.join(data_folder, "lang.txt")
+            with open(task_path, 'r') as file:
+                task_lines = file.readlines()
+            task_lines = [line.strip() for line in task_lines]
+            
+            for task_description in task_lines:
+                if "confidence" in task_description:
+                    continue
+                background_image = cv2.imread(background)
+                for i in range (len(object_positions)):
+                    args = SimpleNamespace(
+                        default=default,
+                        robot_args=robot_args,
+                        background = background_image,
+                        task_description=task_description,
+                        camera_1_args=camera_1_args,
+                        intrinsics=intrinsics,
+                        extrinsics=extrinsics,
+                        asset_folder=asset_folder,
+                        object_positions=object_positions,
+                        object_properties=physics_properties,
+                        test_id = 0,
+                        scene_name = scene_name,
+                        port = port,
+                        output_dir = os.path.join(output_dir, "permute_test", scene_name),
+                        model_name = model_name,
+                    )
                     
-                    permuted_object_positions = copy.deepcopy(object_positions)
-                    for key, val1, val2 in zip(permuted_object_positions.keys(), xy_list, z_list):
-                        permuted_object_positions[key]['translation'][:2] = val1[:2]
-                        permuted_object_positions[key]['translation'][2] = val2
-                    args.object_positions = permuted_object_positions
-                    args.test_id = f"test0_{i}"
-                
-                    p = DefaulTest(args)
-                    p.run()
+                    if i != 0:
+                        random.seed(i)
+                        keys = list(object_positions.keys())
+                        values = list(object_positions.values())
+                        translations = [value['translation'] for value in values]
+                        xy_list = [t[:2] for t in translations]
+                        z_list = [t[2] for t in translations]
+
+                        random.shuffle(xy_list)
+                        
+                        permuted_object_positions = copy.deepcopy(object_positions)
+                        for key, val1, val2 in zip(permuted_object_positions.keys(), xy_list, z_list):
+                            permuted_object_positions[key]['translation'][:2] = val1[:2]
+                            permuted_object_positions[key]['translation'][2] = val2
+                        args.object_positions = permuted_object_positions
+                        args.test_id = f"test0_{i}"
+                    
+                        p = DefaulTest(args)
+                        p.run()
+        except:
+            import sys
+            import traceback
+            print(f"Error processing scene '{scene_name}': {traceback.format_exc()}", file=sys.stderr)

@@ -14,7 +14,7 @@ import sapien.core as sapien
 from scipy.spatial.transform import Rotation
 from types import SimpleNamespace
 from src.sim.simulator_genesis import SimulatorGenesis
-from src.utils.test_utils import get_genesis_extrinsics, reproject_to_plane, find_link_indices, is_grasping_two_finger, apply_safety_limits, rotate6D_to_euler_xyz
+from src.utils.test_utils import get_genesis_extrinsics, find_link_indices, is_grasping_two_finger, apply_safety_limits, rotate6D_to_euler_xyz, reproject_to_plane, resolve_overlap
 from transforms3d.axangles import mat2axangle
 from transforms3d.euler import euler2axangle, euler2mat, euler2quat, quat2euler, axangle2euler
 from transforms3d.quaternions import axangle2quat, mat2quat, quat2axangle, quat2mat,qconjugate 
@@ -25,8 +25,11 @@ import collections
 import math
 from scipy.spatial.transform import Rotation as R
 
-
-class DefaulTest:
+class DefaultTestDemo:
+    """
+    Following bridge_demo's approach for object loading and scene setup,
+    but using all other methods from default_test.py
+    """
     def __init__(self, args, **kwargs):
         super().__init__(**kwargs)
         self.args = args
@@ -34,9 +37,12 @@ class DefaulTest:
         self.pred_action_queue = collections.deque()
 
     def setup(self):
+        # Simple simulator setup - following bridge_demo
         self.simulator = SimulatorGenesis(
             self.args.robot_args["name"], 1, show_viewer=False, add_robot=True
         )
+        
+        # Start simulation - following bridge_demo (no default parameter)
         self.target_asset = None
         self.desti_asset = None
         if self.args.scene_name == "default2":
@@ -44,13 +50,17 @@ class DefaulTest:
         else:
             self.simulator.start_sim(default = self.args.default)
         self.task_description = self.args.task_description
-        self.target_image =self.args.background
+        self.target_image = self.args.background
         self.output_dir = self.args.output_dir
-        self.estimated_transform, fov, W, H = get_genesis_extrinsics(self.args.extrinsics, self.args.intrinsics)
-        self.use_initail_camera = True
         self.target_rotation = None
         self.target_translation = None
         self.port = self.args.port
+        self.use_initail_camera = True
+        
+        # Setup camera using extrinsics
+        self.estimated_transform, fov, W, H = get_genesis_extrinsics(self.args.extrinsics, self.args.intrinsics)
+        self.H, self.W = self.target_image.shape[:2]
+        self.fov = fov
         
         if hasattr(self.args, "camera_pos") and hasattr(self.args, "camera_lookat"):
             self.use_initail_camera = False
@@ -75,13 +85,16 @@ class DefaulTest:
                 GUI=False,
             )
         
+        # Load objects BEFORE building scene - following bridge_demo
         for key, attributes in self.args.object_positions.items():
             count = int(key.split("_")[1])
-            asset_file = os.path.join(self.args.asset_folder, key + ".glb") 
+            asset_file = os.path.join(self.args.asset_folder, key + ".glb")
+            
             if self.args.object_properties:
                 physics = self.args.object_properties[count]
             else:
                 physics = None
+
             object_name = physics["object_name"] if physics and "object_name" in physics else key
             if "emission" in attributes:
                 asset = self.simulator.scene.add_entity(
@@ -124,13 +137,18 @@ class DefaulTest:
                     if "destination" in object_name:
                         self.desti_asset = asset
             else:
-                if os.path.exists(asset_file):  
+                if os.path.exists(asset_file):
+                    # Direct position loading
                     pos = attributes["translation"]
-                    pos = np.array(pos)
                     pos_new, scale_factor = reproject_to_plane(pos, self.args.intrinsics, self.args.extrinsics, 0.02)
+                    # pos = np.array(pos)
                     scale = attributes["scale"] * scale_factor
                     rotation = mat2quat(np.array(attributes["rotation"]))
-                    scale = self.simulator.asset_addtion(asset_file, pos=pos_new, scale=scale, quat=rotation, physics=physics)
+                    
+                    # Add asset with simple call
+                    self.simulator.asset_addtion(asset_file, pos=pos_new, scale=scale, quat=rotation, physics=physics)
+                    print(f"Loaded {key} at position {pos} with scale {scale}")
+
                     if "target" in object_name:
                         self.target_asset = self.simulator.asset_ID[scale][0]
                         self.target_rotation = attributes["rotation"]
@@ -140,36 +158,90 @@ class DefaulTest:
                 else:
                     print(f"Warning: File not found - {asset_file}")
         
-            
         self.camera_1 = self.simulator.scene.add_camera(
             res=(self.W, self.H),
-            pos = self.args.camera_1_args["pos"],
-            lookat = self.args.camera_1_args["lookat"],
-            fov = self.args.camera_1_args["fov"],
+            pos=self.args.camera_1_args["pos"],
+            lookat=self.args.camera_1_args["lookat"],
+            fov=self.args.camera_1_args["fov"],
             GUI=False,
         )
-            
-        self.reward_func = None
+        
+        # BUILD SCENE - following bridge_demo order
+        print("Building scene...")
         self.simulator.scene.build()
+        
+        # Set physics properties AFTER build - following bridge_demo
+        print("Setting physics properties...")
         if not self.args.default:
-            for key, asset in self.simulator.asset_ID.items():
-                asset[0].set_mass(asset[1])
-                asset[0].set_friction(asset[2])
+            for _, value in self.simulator.get_asset_ID().items():
+                for key, asset in self.simulator.asset_ID.items():
+                    asset[0].set_mass(asset[1])
+                    asset[0].set_friction(asset[2])
+                    # Set restitution to 0.0 to prevent bouncing (default is often 0.5)
+    
+        # Set camera pose
         if self.use_initail_camera:
             self.camera_0.set_pose(self.estimated_transform)
+        
+        # Set robot initial position
+        print("Setting robot position...")
         self.simulator.robot.set_qpos(self.args.robot_args["init_pos"])
+        
+        # Get finger indices
         self.left_finger_idx = find_link_indices(self.simulator.robot, ['left_finger'], global_idx=True)[0]
         self.right_finger_idx = find_link_indices(self.simulator.robot, ['right_finger'], global_idx=True)[0]
-
+        
+        # Single step to stabilize - following bridge_demo
         self.simulator.step()
-        self.set_transformation_properties()  # Typo fixed: transformation not tranformation
 
-    
+        for _, value in self.simulator.get_asset_ID().items():
+            asset = value[0]
+            # check if the object is below the ground and if so, move it up
+            aabb_min, aabb_max = asset.get_AABB()
+            z_bottom = aabb_min[2]
+            if z_bottom < 0:
+                # 1. Get the current position (it's a CUDA tensor)
+                current_pos = asset.get_pos() 
+
+                # 2. Create the offset tensor directly on the same GPU device
+                # Using -z_bottom + 0.01 to lift the object out of the floor
+                offset = torch.tensor([0.0, 0.0, -z_bottom + 0.01], device=current_pos.device)
+
+                # 3. Perform the addition and set the new position
+                asset.set_pos(current_pos + offset)
+        
+        # Set transformation properties for action execution
+        self.set_transformation_properties()
+
+        # collision detector
+        solver = self.simulator.scene.sim.rigid_solver
+        solver.collider.detection()
+        entity_keys = list(self.simulator.assets_entity.keys())
+        for _ in range(5):
+            moved = False
+            for i in range(len(entity_keys)):
+                entity = self.simulator.assets_entity[entity_keys[i]]
+                for j in range(i + 1, len(entity_keys)):
+                    other_entity = self.simulator.assets_entity[entity_keys[j]]
+                    moved = moved or resolve_overlap(entity, other_entity, entity1_name=entity_keys[i], entity2_name=entity_keys[j], buffer=0.005)
+            self.simulator.step()
+        
+        print("Setup complete!")
+
     def set_transformation_properties(self):
         self.ee_link = self.simulator.robot.get_link("ee_gripper_link")
-        self.prev_ee_pose_at_world = sapien.Pose(self.simulator.robot.get_link("ee_gripper_link").get_pos().cpu().numpy(), self.simulator.robot.get_link("ee_gripper_link").get_quat().cpu().numpy())
-        self.base_in_world_inv =  sapien.Pose(self.simulator.robot.get_link("base_link").get_pos().cpu().numpy(), self.simulator.robot.get_link("base_link").get_quat().cpu().numpy()).inv()
-        self.base_in_world =sapien.Pose(self.simulator.robot.get_link("base_link").get_pos().cpu().numpy(), self.simulator.robot.get_link("base_link").get_quat().cpu().numpy())
+        self.prev_ee_pose_at_world = sapien.Pose(
+            self.simulator.robot.get_link("ee_gripper_link").get_pos().cpu().numpy(),
+            self.simulator.robot.get_link("ee_gripper_link").get_quat().cpu().numpy()
+        )
+        self.base_in_world_inv = sapien.Pose(
+            self.simulator.robot.get_link("base_link").get_pos().cpu().numpy(),
+            self.simulator.robot.get_link("base_link").get_quat().cpu().numpy()
+        ).inv()
+        self.base_in_world = sapien.Pose(
+            self.simulator.robot.get_link("base_link").get_pos().cpu().numpy(),
+            self.simulator.robot.get_link("base_link").get_quat().cpu().numpy()
+        )
         self.prev_ee_pose_at_base = self.base_in_world_inv * self.prev_ee_pose_at_world
         self.prev_gripper = 0.0
     
@@ -191,12 +263,10 @@ class DefaulTest:
         else:
             payload = {
                 "instruction": self.task_description,
-                "image": image.tolist(),  
+                "image": image.tolist(),
             }
-        
         return payload
-        
-        
+    
     def reset_model(self):
         requests.post(f"http://localhost:{self.port}/reset",
         json={
@@ -211,10 +281,10 @@ class DefaulTest:
     
     def transform_actions_delta(self, raw_action, action):
         delta_quat = euler2quat(*raw_action["rotation_delta"])
-        delta_pose  = sapien.Pose(raw_action["world_vector"],delta_quat)
+        delta_pose = sapien.Pose(raw_action["world_vector"], delta_quat)
         cur_ee_pose_at_world = sapien.Pose(self.ee_link.get_pos().cpu().numpy(), self.ee_link.get_quat().cpu().numpy())
         cur_ee_pose_at_base = self.base_in_world_inv * cur_ee_pose_at_world
-        target_pose = (sapien.Pose(p=cur_ee_pose_at_base.p)* delta_pose * sapien.Pose(p=cur_ee_pose_at_base.p).inv()) * self.prev_ee_pose_at_base
+        target_pose = (sapien.Pose(p=cur_ee_pose_at_base.p) * delta_pose * sapien.Pose(p=cur_ee_pose_at_base.p).inv()) * self.prev_ee_pose_at_base
         self.final_pose = self.base_in_world * target_pose
         self.prev_ee_pose_at_base = target_pose
         self.prev_gripper = action["gripper"]
@@ -222,7 +292,7 @@ class DefaulTest:
         return self.final_pose
 
     def transform_actions_exact(self, raw_action, action):
-        target_quat = euler2quat(*raw_action["rotation_delta"]) 
+        target_quat = euler2quat(*raw_action["rotation_delta"])
         target_pose_in_base = sapien.Pose(raw_action["world_vector"], target_quat)
         self.final_pose = self.base_in_world * target_pose_in_base
         self.prev_ee_pose_at_base = target_pose_in_base
@@ -235,7 +305,7 @@ class DefaulTest:
             return self.transform_actions_exact(raw_action, action)
         else:
             return self.transform_actions_delta(raw_action, action)
-        
+    
     def get_action(self):
         if self.action_queue:
             image, rgb = self.get_image()
@@ -245,10 +315,12 @@ class DefaulTest:
                 self._update_xvla_proprioception(pred_action)
             self.transform_actions(raw_action, action)
             return self.final_pose, action["gripper"], image
+        
         image, rgb = self.get_image()
         res = requests.post(f"http://localhost:{self.port}/act",
         json=self.prepare_action_payload(image))
         response = res.json()
+        
         if "raw_action" in response:
             raw_action = {k: np.array(v) for k, v in response["raw_action"].items()}
             action = {k: np.array(v) for k, v in response["action"].items()}
@@ -260,9 +332,10 @@ class DefaulTest:
             if self.args.model_name == "xvla":
                 action_pred = np.array(self.pred_action_queue.popleft(), dtype=np.float32)
                 self._update_xvla_proprioception(action_pred)
+        
         self.transform_actions(raw_action, action)
         return self.final_pose, action["gripper"], image
-        
+    
     def get_image(self):
         rgb, _, seg, _ = self.camera_0.render(rgb=True, depth=True, segmentation=True)
         rgb_bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
@@ -279,7 +352,6 @@ class DefaulTest:
     def _init_xvla_proprioception(self):
         ee_pose_wrt_base = self.prev_ee_pose_at_base
         proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, np.array([1, 0, 0, 1, 0, 0, 0])])).to(dtype=torch.float32)
-        # proprioception = torch.from_numpy(np.concatenate([ee_pose_wrt_base.p, ee_pose_wrt_base.q, np.array([0, 0, 0])])).to(dtype=torch.float32)
         proprioception = torch.cat([proprioception, torch.zeros_like(proprioception)], dim=-1).numpy().copy()
         self.xvla_proprioception = proprioception.copy()
         return proprioception
@@ -350,12 +422,12 @@ class DefaulTest:
         object_states = {}
         reward = 0
         print("Running Test on task:", self.args.task_description)
-        self.set_task(self.args.task_description) 
+        self.set_task(self.args.task_description)
         self.reset_model()
         
         enable_welding = True
         welded = False
-        link_robot = np.array([ self.simulator.robot.get_link("ee_gripper_link").idx], dtype=gs.np_int)
+        link_robot = np.array([self.simulator.robot.get_link("ee_gripper_link").idx], dtype=gs.np_int)
         rigid = self.simulator.scene.sim.rigid_solver
         
         for i in range(65):
@@ -376,6 +448,7 @@ class DefaulTest:
                 pose = self.prev_ee_pose_at_world
                 gripper = 0.0
                 image = None
+            
             des_q = self.simulator.robot.inverse_kinematics(
                 link=self.ee_link,
                 pos=np.array(pose.p),
@@ -394,24 +467,24 @@ class DefaulTest:
                     if welded:
                         welded = False
                         rigid.delete_weld_constraint(link_obj, link_robot)
-                self.simulator.robot.control_dofs_force(np.array([10, 10]), dofs_idx_local=np.arange(6,8))
+                self.simulator.robot.control_dofs_force(np.array([10, 10]), dofs_idx_local=np.arange(6, 8))
                 for _ in range(60):
                     self.simulator.scene.step()
             else:
                 for _ in range(60):
                     self.simulator.robot.control_dofs_force(
                         apply_safety_limits(
-                            torch.tensor([-10,-10]),
+                            torch.tensor([-10, -10]).to(device='cuda:0'),
                             self.simulator.robot.get_dofs_position()[6:],
                             self.simulator.robot.get_dofs_velocity()[6:],
-                            motors_soft_position_lower = 0.01,
-                            motors_soft_position_upper = 0.037,
-                            motors_effort_limit = 10,
-                            motors_velocity_limit = 0.05,
-                            kp = 100,
-                            kd = 0.5,
+                            motors_soft_position_lower=0.01,
+                            motors_soft_position_upper=0.037,
+                            motors_effort_limit=10,
+                            motors_velocity_limit=0.05,
+                            kp=100,
+                            kd=0.5,
                         ),
-                        dofs_idx_local = torch.tensor([6,7]).to(device='cuda:0')
+                        dofs_idx_local=torch.tensor([6, 7]).to(device='cuda:0')
                     )
                     self.simulator.step()
                     
@@ -425,12 +498,13 @@ class DefaulTest:
                                 self.left_finger_idx,
                                 self.right_finger_idx
                             )
-                            if is_grasping:
-                                if not welded:
-                                    # add suction / weld constraint
-                                    link_obj = np.array([e.links[0].idx], dtype=gs.np_int)
-                                    rigid.add_weld_constraint(link_obj, link_robot)
-                                    welded = True
+                            # if is_grasping:
+                            #     if not welded:
+                            #         # add suction / weld constraint
+                            #         link_obj = np.array([e.links[0].idx], dtype=gs.np_int)
+                            #         rigid.add_weld_constraint(link_obj, link_robot)
+                            #         welded = True
+            
             if image is not None:
                 imx.append(image)
         
@@ -440,7 +514,6 @@ class DefaulTest:
         world_states = np.array(world_states)
         base_states = np.array(base_states)
         np.savez(os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.npz"), world=world_states, base=base_states, **object_states)
-        
 
     def reward_reaching_cube(self, ee_link, asset):
         tcp_goal_dist = torch.linalg.norm(
@@ -500,7 +573,6 @@ if __name__ == "__main__":
         "fov": 80,
     }
 
-
     config = load_config(args.config)
     base_folder = config['base_folder']
     scene_name = config['scene_name']
@@ -519,67 +591,70 @@ if __name__ == "__main__":
     print("Scenes to process:", scene_lists)
     
     for scene_name in scene_lists:
-        if scene_name.startswith("default"):
-            if run_default:
-                default = True
+        try:
+            if scene_name.startswith("default"):
+                if run_default:
+                    default = True
+                else:
+                    continue
+            
+            elif scene_name.startswith("scene"):
+                if run_default:
+                    continue
+                else:
+                    default = False
             else:
                 continue
-        
-        elif scene_name.startswith("scene"):
-            if run_default:
+            
+            if os.path.exists(os.path.join(output_folder, "default_test", scene_name)):
+                print(f"Skipping {scene_name} as results already exist.")
                 continue
+            
+            data_folder = os.path.join(base_folder, "bridge", scene_name)
+            asset_folder = os.path.join(base_folder, "assets", scene_name)
+            background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
+            extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
+            intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
+            
+            with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
+                object_positions = json.load(f)
+            
+            if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
+                with open(os.path.join(data_folder, "masks", "result.json"), 'r') as f:
+                    physics_properties = json.load(f)
             else:
-                default = False
-        else:
-            continue
-
-        
-        if os.path.exists(os.path.join(output_folder, "default_test",scene_name)):
-            print(f"Skipping {scene_name} as results already exist.")
-            continue
-        
-        
-        data_folder = os.path.join(base_folder, "bridge", scene_name)
-        asset_folder = os.path.join(base_folder, "assets", scene_name)
-        background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
-        extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
-        intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
-        
-        with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
-            object_positions = json.load(f)
-        
-        if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
-            with open(os.path.join(data_folder, "masks","result.json"), 'r') as f:
-                physics_properties = json.load(f)
-        else:
-            with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
-                physics_properties = json.load(f)
-        
-        task_path = os.path.join(data_folder, "lang.txt")
-        with open(task_path, 'r') as file:
-            task_lines = file.readlines()
-        task_lines = [line.strip() for line in task_lines]
-        
-        for task_description in task_lines:
-            if "confidence" in task_description:
-                continue
-            for i in range (1):
-                args = SimpleNamespace(
-                    default=default,
-                    robot_args=robot_args,
-                    background=cv2.imread(background),
-                    task_description=task_description,
-                    camera_1_args=camera_1_args,
-                    intrinsics=intrinsics,
-                    extrinsics=extrinsics,
-                    asset_folder=asset_folder,
-                    object_positions=object_positions,
-                    object_properties=physics_properties,
-                    test_id = i,
-                    port = port,
-                    scene_name = scene_name,
-                    output_dir = os.path.join(output_folder, "default_test",scene_name),
-                    model_name = model_name,
-                )
-                p = DefaulTest(args)
-                p.run()
+                with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
+                    physics_properties = json.load(f)
+            
+            task_path = os.path.join(data_folder, "lang.txt")
+            with open(task_path, 'r') as file:
+                task_lines = file.readlines()
+            task_lines = [line.strip() for line in task_lines]
+            
+            for task_description in task_lines:
+                if "confidence" in task_description:
+                    continue
+                for i in range(1):
+                    args = SimpleNamespace(
+                        default=default,
+                        robot_args=robot_args,
+                        background=cv2.imread(background),
+                        task_description=task_description,
+                        camera_1_args=camera_1_args,
+                        intrinsics=intrinsics,
+                        extrinsics=extrinsics,
+                        asset_folder=asset_folder,
+                        object_positions=object_positions,
+                        object_properties=physics_properties,
+                        test_id=i,
+                        port=port,
+                        scene_name=scene_name,
+                        output_dir=os.path.join(output_folder, "default_test", scene_name),
+                        model_name=model_name,
+                    )
+                    p = DefaultTestDemo(args)
+                    p.run()
+        except:
+            import sys
+            import traceback
+            print(f"Error processing scene '{scene_name}': {traceback.format_exc()}", file=sys.stderr)
