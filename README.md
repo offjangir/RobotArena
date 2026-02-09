@@ -152,7 +152,7 @@ pip install -r requirements.txt
 cd ..
 git clone https://github.com/Genesis-Embodied-AI/Genesis
 cd Genesis
-git checkout 1ad1301
+git checkout 9af0bec
 conda create -n genesis python=3.10
 conda activate genesis
 pip install -e .
