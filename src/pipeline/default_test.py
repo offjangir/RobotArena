@@ -498,12 +498,12 @@ class DefaultTestDemo:
                                 self.left_finger_idx,
                                 self.right_finger_idx
                             )
-                            # if is_grasping:
-                            #     if not welded:
-                            #         # add suction / weld constraint
-                            #         link_obj = np.array([e.links[0].idx], dtype=gs.np_int)
-                            #         rigid.add_weld_constraint(link_obj, link_robot)
-                            #         welded = True
+                            if is_grasping:
+                                if not welded:
+                                    # add suction / weld constraint
+                                    link_obj = np.array([e.links[0].idx], dtype=gs.np_int)
+                                    rigid.add_weld_constraint(link_obj, link_robot)
+                                    welded = True
             
             if image is not None:
                 imx.append(image)

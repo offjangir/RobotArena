@@ -69,6 +69,8 @@ class SimulatorGenesis:
                         pos= pos,
                         quat= quat,
                         scale= scale,
+                        convexify= True,
+                        decimate= True,
                         ),
             ),
             None,
@@ -86,6 +88,7 @@ class SimulatorGenesis:
                         quat= quat,
                         scale= scale,
                         convexify= True,
+                        decimate= True,
                         ),
                 surface = surface
             ),
