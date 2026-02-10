@@ -16,7 +16,7 @@ from scipy.spatial.transform import Rotation
 import genesis as gs
 import itertools
 from transforms3d.quaternions import quat2mat, mat2quat
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 import copy
 # load from 
 if __name__ == "__main__":
@@ -136,7 +136,7 @@ if __name__ == "__main__":
                         args.object_positions = permuted_object_positions
                         args.test_id = f"test0_{i}"
                     
-                        p = DefaulTest(args)
+                        p = DefaultTest(args)
                         p.run()
         except:
             import sys

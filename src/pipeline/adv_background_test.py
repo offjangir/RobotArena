@@ -6,7 +6,7 @@ import json
 import torch
 import numpy as np
 from types import SimpleNamespace
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 
 
 def blend_target_image_color_space(image, blend_value):
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                             output_dir = os.path.join(output_dir, "adv_background_test", scene_name),
                             model_name = model_name,
                         )
-                        p = DefaulTest(args)
+                        p = DefaultTest(args)
                         p.run()
         except:
             import sys

@@ -6,7 +6,7 @@ import json
 import torch
 import numpy as np
 from types import SimpleNamespace
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 
 # load from 
 if __name__ == "__main__":
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                         background_image = cv2.imread(bc_petrub)
                         args.background = background_image
                         args.test_id = f"{i}_{alpha}"
-                        p = DefaulTest(args)
+                        p = DefaultTest(args)
                         p.run()
         except:
             import sys
