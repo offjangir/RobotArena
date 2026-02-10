@@ -83,11 +83,11 @@ if __name__ == "__main__":
             with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
                 object_positions = json.load(f)
             
-            if not os.path.exists(os.path.join(data_folder, "masks", "physical_properties.json")):
-                with open(os.path.join(data_folder, "masks","result.json"), 'r') as f:
+            if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
+                with open(os.path.join(data_folder, "masks", "result.json"), 'r') as f:
                     physics_properties = json.load(f)
             else:
-                with open(os.path.join(data_folder, "masks", "physical_properties.json"), 'r') as f:
+                with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
                     physics_properties = json.load(f)
             if os.path.exists(os.path.join(output_dir,"adv_background_test", scene_name)):
                 continue
