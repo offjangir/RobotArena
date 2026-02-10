@@ -25,7 +25,7 @@ import collections
 import math
 from scipy.spatial.transform import Rotation as R
 
-class DefaultTestDemo:
+class DefaultTest:
     """
     Following bridge_demo's approach for object loading and scene setup,
     but using all other methods from default_test.py
@@ -652,7 +652,7 @@ if __name__ == "__main__":
                         output_dir=os.path.join(output_folder, "default_test", scene_name),
                         model_name=model_name,
                     )
-                    p = DefaultTestDemo(args)
+                    p = DefaultTest(args)
                     p.run()
         except:
             import sys
