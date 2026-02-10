@@ -27,6 +27,7 @@ if __name__ == "__main__":
     parser.add_argument('--run_all', type=str2bool, default=False, help='Run all scenes or a specific one')
     parser.add_argument('--output_dir', type=str, default="./results", help='Output directory for results')
     parser.add_argument('--port', type=int, default=9010, help='Port for the server')
+    parser.add_argument('--vla', type=str, required=True, help='Name of the VLA model')
     
     args = parser.parse_args()
     robot_args = {
@@ -47,6 +48,7 @@ if __name__ == "__main__":
     scene_name = config['scene_name']
     output_dir = args.output_dir
     port = args.port
+    model_name = args.vla
     
     run_default = False
     if ("default" in output_dir):
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     if args.run_all:
         scene_lists = os.listdir(os.path.join(base_folder, "bridge"))
     else:
-        scene_lists = [scene_name]
+        scene_lists = [scene_name] if type(scene_name) is str else scene_name
     for scene_name in scene_lists:
         if scene_name.startswith("default"):
             if run_default:
@@ -111,6 +113,7 @@ if __name__ == "__main__":
                     port = port,
                     scene_name = scene_name,
                     output_dir = os.path.join( output_dir ,"camera_test", scene_name),
+                    model_name = model_name,
                 )
                 p = CameraTest(args)
                 p.camera_setup()

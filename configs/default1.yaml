@@ -1,0 +1,3 @@
+base_folder: "./data/data"
+robot: "franka"
+scene_name: "droid2"

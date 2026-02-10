@@ -6,7 +6,7 @@ import json
 import torch
 import numpy as np
 from types import SimpleNamespace
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 
 # load from 
 if __name__ == "__main__":
@@ -16,6 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('--background_folder', type=str, default="./examples/background", help='Path to the background folder')
     parser.add_argument('--output_dir', type=str, default="./results", help='Output directory for results')
     parser.add_argument('--port', type=int, default=9010, help='Port for the server')
+    parser.add_argument('--vla', type=str, required=True, help='Name of the VLA model')
     
     args = parser.parse_args()
     robot_args = {
@@ -37,77 +38,89 @@ if __name__ == "__main__":
     
     port = args.port
     output_dir = args.output_dir
-    background_folder = args.background_folder  
+    background_folder = args.background_folder
+    model_name = args.vla
+
     run_default = False
     if ("default" in output_dir):
         run_default = True
     if args.run_all:
         scene_lists = os.listdir(os.path.join(base_folder, "bridge"))
     else:
-        scene_lists = [scene_name]
+        scene_lists = [scene_name] if type(scene_name) is str else scene_name
     for scene_name in scene_lists:
-        if scene_name.startswith("default"):
-            if run_default:
-                default = True
+        try:
+            if scene_name.startswith("default"):
+                if run_default:
+                    default = True
+                else:
+                    continue
+            elif scene_name.startswith("scene"):
+                if run_default:
+                    continue
+                else:
+                    default = False
             else:
                 continue
-        elif scene_name.startswith("scene"):
-            if run_default:
+            
+            if os.path.exists(os.path.join(output_dir, "background_test", scene_name)):
+                print(f"Skipping {scene_name} as results already exist.")
                 continue
+
+            data_folder = os.path.join(base_folder, "bridge", scene_name)
+            asset_folder = os.path.join(base_folder, "assets", scene_name)
+            background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
+            extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
+            intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
+            
+            with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
+                object_positions = json.load(f)
+            
+            if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
+                with open(os.path.join(data_folder, "masks", "result.json"), 'r') as f:
+                    physics_properties = json.load(f)
             else:
-                default = False
-        else:
-            continue
-        data_folder = os.path.join(base_folder, "bridge", scene_name)
-        asset_folder = os.path.join(base_folder, "assets", scene_name)
-        background = os.path.join(base_folder, "scene_background", scene_name, "background.png")
-        extrinsics = np.load(os.path.join(data_folder, "extrinsics.npy"))
-        intrinsics = np.load(os.path.join(data_folder, "intrinsics.npy"))
-        
-        with open(os.path.join(data_folder, "masks", "transformations.json"), 'r') as f:
-            object_positions = json.load(f)
-        
-        if not os.path.exists(os.path.join(data_folder, "physical_properties.json")):
-            with open(os.path.join(data_folder, "masks","result.json"), 'r') as f:
-                physics_properties = json.load(f)
-        else:
-            with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
-                physics_properties = json.load(f)
-        
-        task_path = os.path.join(data_folder, "lang.txt")
-        with open(task_path, 'r') as file:
-            task_lines = file.readlines()
-        task_lines = [line.strip() for line in task_lines]
-        
-        for task_description in task_lines:
-            if "confidence" in task_description:
-                continue
-            background_image = cv2.imread(background)
-            for i in range (1):
-                import glob
-                pngs = glob.glob(os.path.join(background_folder, "*.png"))
-                args = SimpleNamespace(
-                    default=default,
-                    robot_args=robot_args,
-                    task_description=task_description,
-                    camera_1_args=camera_1_args,
-                    intrinsics=intrinsics,
-                    extrinsics=extrinsics,
-                    asset_folder=asset_folder,
-                    object_positions=object_positions,
-                    object_properties=physics_properties,
-                    test_id = f"{i}",
-                    port = port,
-                    scene_name = scene_name,
-                    output_dir = os.path.join(output_dir, "background_test", scene_name),
-                )
-                
-                for alpha, bc_petrub in enumerate(pngs):
-                    background_image = cv2.imread(bc_petrub)
-                    args.background = background_image
-                    args.test_id = f"{i}_{alpha}"
-                    p = DefaulTest(args)
-                    p.run()
-                
+                with open(os.path.join(data_folder, "physical_properties.json"), 'r') as f:
+                    physics_properties = json.load(f)
+            
+            task_path = os.path.join(data_folder, "lang.txt")
+            with open(task_path, 'r') as file:
+                task_lines = file.readlines()
+            task_lines = [line.strip() for line in task_lines]
+            
+            for task_description in task_lines:
+                if "confidence" in task_description:
+                    continue
+                background_image = cv2.imread(background)
+                for i in range (1):
+                    import glob
+                    pngs = glob.glob(os.path.join(background_folder, "*.png"))
+                    args = SimpleNamespace(
+                        default=default,
+                        robot_args=robot_args,
+                        task_description=task_description,
+                        camera_1_args=camera_1_args,
+                        intrinsics=intrinsics,
+                        extrinsics=extrinsics,
+                        asset_folder=asset_folder,
+                        object_positions=object_positions,
+                        object_properties=physics_properties,
+                        test_id = f"{i}",
+                        port = port,
+                        scene_name = scene_name,
+                        output_dir = os.path.join(output_dir, "background_test", scene_name),
+                        model_name = model_name,
+                    )
+                    
+                    for alpha, bc_petrub in enumerate(pngs):
+                        background_image = cv2.imread(bc_petrub)
+                        args.background = background_image
+                        args.test_id = f"{i}_{alpha}"
+                        p = DefaultTest(args)
+                        p.run()
+        except:
+            import sys
+            import traceback
+            print(f"Error processing scene '{scene_name}': {traceback.format_exc()}", file=sys.stderr)
                 
                 

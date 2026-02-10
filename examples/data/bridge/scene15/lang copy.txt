@@ -1,2 +1,0 @@
-put the blue block on top of the red block
-confidence: 0.6

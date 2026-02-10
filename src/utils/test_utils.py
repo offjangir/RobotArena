@@ -13,6 +13,7 @@ import numpy as np
 import genesis as gs
 import torch
 from torch.nn import functional as F
+from scipy.spatial.transform import Rotation as R
 
 def get_genesis_extrinsics(extrinsics, intrinsics):
     T = np.array(extrinsics)
@@ -297,3 +298,82 @@ def apply_safety_limits(
         print(command, safe_effort_lower, safe_effort_upper)
     res = torch.clip(command, safe_effort_lower, safe_effort_upper)
     return res
+
+def rotate6D_to_euler_xyz(v6: np.ndarray) -> np.ndarray:
+    """Convert 6D rotation representation back to Euler angles (xyz)."""
+    v6 = np.asarray(v6)
+    if v6.shape[-1] != 6:
+        raise ValueError(f"Last dimension must be 6, got {v6.shape[-1]}")
+    a1 = v6[..., 0:5:2]
+    a2 = v6[..., 1:6:2]
+    b1 = a1 / np.linalg.norm(a1, axis=-1, keepdims=True)
+    proj = np.sum(b1 * a2, axis=-1, keepdims=True) * b1
+    b2 = a2 - proj
+    b2 = b2 / np.linalg.norm(b2, axis=-1, keepdims=True)
+    b3 = np.cross(b1, b2)
+    rot_mats = np.stack((b1, b2, b3), axis=-1)
+    return R.from_matrix(rot_mats).as_euler("xyz")
+
+def resolve_overlap(entity1, entity2, entity1_name, entity2_name, buffer=0.005):
+    """
+    Checks for AABB overlap using the user's logic.
+    If overlapping, moves the upper object higher in Z to clear the lower object.
+    
+    Args:
+        entity1, entity2: Genesis entities (must have .get_aabb() and .get_pos())
+        buffer: Small gap (e.g., 5mm) to leave between objects so they don't touch perfectly.
+    """
+    
+    # 1. Get AABB data from Genesis entities
+    # Genesis returns numpy arrays for min and max
+    aabb1_min, aabb1_max = entity1.get_AABB()
+    aabb2_min, aabb2_max = entity2.get_AABB()
+
+    # 2. Your Provided Overlap Logic
+    aabb_overlap = (
+        aabb1_min[0] <= aabb2_max[0] and aabb1_max[0] >= aabb2_min[0] and
+        aabb1_min[1] <= aabb2_max[1] and aabb1_max[1] >= aabb2_min[1] and
+        aabb1_min[2] <= aabb2_max[2] and aabb1_max[2] >= aabb2_min[2]
+    )
+
+    if aabb_overlap:
+        print(f"Overlap detected between {entity1_name} and {entity2_name}. Resolving...")
+        
+        # 3. Determine which object is the 'Upper' one
+        # We compare the geometric centers in Z to decide who should move up.
+        center_z_1 = (aabb1_min[2] + aabb1_max[2]) / 2.0
+        center_z_2 = (aabb2_min[2] + aabb2_max[2]) / 2.0
+
+        if center_z_1 >= center_z_2:
+            upper_entity = entity1
+            upper_aabb_min = aabb1_min
+            lower_aabb_max = aabb2_max
+            upper_entity_name = entity1_name
+        else:
+            upper_entity = entity2
+            upper_aabb_min = aabb2_min
+            lower_aabb_max = aabb1_max
+            upper_entity_name = entity2_name
+
+        # 4. Calculate required elevation
+        # We need the bottom of the upper object (min_z) to be 
+        # exactly at the top of the lower object (max_z) + buffer.
+        
+        current_bottom_z = upper_aabb_min[2]
+        target_bottom_z = lower_aabb_max[2] + buffer
+        
+        lift_amount = target_bottom_z - current_bottom_z
+        
+        # 5. Apply the new position
+        # Only apply if lift is positive (sometimes AABBs overlap but centers are weird)
+        if lift_amount > 0:
+            current_pos = upper_entity.get_pos()
+            new_z = current_pos[2] + lift_amount
+            
+            # Genesis requires setting the full position (x, y, z)
+            upper_entity.set_pos([current_pos[0], current_pos[1], new_z])
+            
+            print(f"-> Elevated {upper_entity_name} by {lift_amount:.4f}m")
+            return True # Correction applied
+
+    return False # No correction needed

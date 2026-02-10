@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate conda environment
-source ~/miniconda3/etc/profile.d/conda.sh  # Change this to your actual conda path
+source ~/user_data/miniconda3/etc/profile.d/conda.sh  # Change this to your actual conda path
 conda activate genesis
 
 # Set project root as PYTHONPATH
@@ -10,7 +10,7 @@ export PYTHONPATH=$(pwd)
 
 # Read inputs or set defaults
 PORT=${1:-9000}
-POLICY=${2:-robovlm}
+POLICY=${2:-open_pi_zero}
 MODE=${3:-default}  # "default" or "generate"
 
 if [ "$MODE" == "default" ]; then
@@ -27,7 +27,8 @@ echo "Mode: $MODE → Output Dir: $OUT_DIR"
 python src/pipeline/default_test.py \
   --output_dir "$OUT_DIR" \
   --run_all true \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
 
 # Notes:

@@ -7,3 +7,9 @@
 [submodule "RoboVLM"]
 	path = RoboVLM
 	url = https://github.com/sorceressyidi/RoboVLMs
+[submodule "open-pi-zero"]
+	path = open-pi-zero
+	url = https://github.com/pcseanlo/open-pi-zero.git
+[submodule "X-VLA"]
+	path = X-VLA
+	url = https://github.com/2toinf/X-VLA.git

@@ -25,7 +25,8 @@ echo "Mode: $MODE → Output Dir: $OUT_DIR"
 python src/pipeline/background_test.py \
   --output_dir "$OUT_DIR" \
   --run_all true \
-  --port "$PORT"
+  --port "$PORT" \
+  --vla "$POLICY"
   # --config <config_file>  # Optional: defaults to config/default.yaml
   # --background_folder <path_to_background_folder>  # Optional: defaults to ./examples/background
 
