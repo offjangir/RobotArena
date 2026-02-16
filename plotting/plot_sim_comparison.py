@@ -82,6 +82,10 @@ def main():
 
     if df_a.empty or df_b.empty:
         print("Missing data from one or both directories. Exiting.")
+        if df_a.empty:
+            print(f"  No data from: {args.base_dir_a} (expect: <policy>/default_test/results.json)")
+        if df_b.empty:
+            print(f"  No data from: {args.base_dir_b} (expect: <policy>/default_test/results.json)")
         return
 
     # Map directory names to display names

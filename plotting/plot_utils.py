@@ -80,7 +80,10 @@ def collect_single_test(base_dir: str, test_dir: str = "default_test",
 
     rows = []
     for policy in sorted(os.listdir(base_dir)):
-        fpath = os.path.join(base_dir, policy, test_dir, filename)
+        policy_path = os.path.join(base_dir, policy)
+        if not os.path.isdir(policy_path):
+            continue
+        fpath = os.path.join(policy_path, test_dir, filename)
         if not os.path.isfile(fpath):
             continue
         with open(fpath, "r") as fh:
@@ -91,6 +94,8 @@ def collect_single_test(base_dir: str, test_dir: str = "default_test",
             f"{dataset_name}_std": data.get("stds", {}).get(metric),
             f"{dataset_name}_sem": data.get("sems", {}).get(metric),
         })
+    if not rows:
+        print(f"Warning: no '{filename}' found under {base_dir}/<policy>/{test_dir}/")
     return pd.DataFrame(rows)
 
 

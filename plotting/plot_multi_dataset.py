@@ -163,7 +163,8 @@ def create_test_comparison_plot(df, metric, error_type, policies,
     fig, ax = plt.subplots(figsize=FIG_SIZE)
     num_policies = len(policies)
     bar_width = 0.20
-    x_pos = np.arange(len(test_order))
+    group_spacing = 1.5  # space between test groups ( > 1 = gap between tests)
+    x_pos = np.arange(len(test_order)) * group_spacing
 
     for i, pol in enumerate(policies):
         scores = pivot.loc[pol].values
