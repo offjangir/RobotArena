@@ -41,7 +41,7 @@ def generate_gemini_prompt_inference_only(inference_frames_base64,first_frame,ta
     # Ground Truth Video Frames with scores and images
     prompt_parts.append({"text": f"Now, for the task of {task_description}, output the task completion\n"
                                  f"percentage for the following frames that are presented in random\n"
-                                 f"order. You response will only contain output for each frame do not deviate from the output format, format your response as follows: "
+                                 f"order. Penalize the progression score if the robot just falls down and does not do anything or does random actions. You response will only contain output for each frame do not deviate from the output format, format your response as follows: "
                                  f" Frame {{i}}: Frame Description: {{What is the status describe}}, Task Completion Percentages: {{predicted_percentage}}%\n"})
     # Inference frames
     prompt_parts.append({"text": "\nNow, predict the task completion percentage for the following each inference frame:\n"})
@@ -69,10 +69,10 @@ def process_video_to_frames_and_data(video_path, num_frames_to_sample = 24, outp
         return [], 0
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fps = cap.get(cv2.CAP_PROP_FPS)
-    duration = frame_count / fps
+    duration = frame_count / (2 * fps)
     num_frames_to_sample = int(duration)
 
-    print(f"Total number of frames in video: {frame_count}")
+    print(f"Total number of frames in video: {num_frames_to_sample}")
     if frame_count < num_frames_to_sample:
         print("Error: Video has fewer frames than requested samples.")
         exit()

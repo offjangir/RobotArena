@@ -149,7 +149,7 @@ if __name__ == "__main__":
     args.test_path = os.path.join(args.base_dir, args.policy, args.test_name)
     if args.zero:
         if args.all_scenes:
-            scene_list = os.listdir(args.test_path)
+            scene_list = [x for x in os.listdir(args.test_path) if os.path.isdir(os.path.join(args.test_path, x))]
         else:
             scene_list = [args.scene_name]
         args.scene_list = scene_list
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     
     if args.one:
         if args.all_scenes:
-            scene_list = os.listdir(args.test_path)
+            scene_list = [x for x in os.listdir(args.test_path) if os.path.isdir(os.path.join(args.test_path, x))]
         else:
             scene_list = [args.scene_name]
         args.scene_list = scene_list
