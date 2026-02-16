@@ -7,10 +7,10 @@ import torch
 import numpy as np
 from types import SimpleNamespace
 from src.utils.test_utils import get_genesis_extrinsics, perturb_pos_lookat_rigid
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 import genesis as gs
 
-class CameraTest(DefaulTest):
+class CameraTest(DefaultTest):
     def __init__(self, config):
         super().__init__(config)
     
@@ -129,7 +129,7 @@ if __name__ == "__main__":
                     args.test_id = f"{i}_{key}"
                     args.camera_pos = value[0]
                     args.camera_lookat = value[1]
-                    p = DefaulTest(args)
+                    p = DefaultTest(args)
                     p.run()
                     cnt += 1
                     

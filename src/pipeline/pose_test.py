@@ -14,10 +14,10 @@ from transforms3d.euler import euler2quat
 from scipy.spatial.transform import Rotation
 import genesis as gs
 import itertools
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 
 
-class PoseTest(DefaulTest):
+class PoseTest(DefaultTest):
     def __init__(self, config):
         super().__init__(config)
     

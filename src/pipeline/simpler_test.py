@@ -19,7 +19,7 @@ from transforms3d.euler import euler2axangle, euler2mat, euler2quat, quat2euler
 from transforms3d.quaternions import axangle2quat, mat2quat, quat2axangle, quat2mat,qconjugate 
 from transforms3d.quaternions import qmult, mat2quat, quat2mat
 from transforms3d.quaternions import rotate_vector
-from src.pipeline.default_test import DefaulTest, load_config, str2bool
+from src.pipeline.default_test import DefaultTest, load_config, str2bool
 import json_numpy as json_np
 import collections
 import math
