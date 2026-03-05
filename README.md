@@ -68,6 +68,9 @@ pip install -r requirements_full_install.txt
 cd ManiSkill2_real2sim
 pip install -e .
 pip install --upgrade typing_extensions
+pip install "numpy<1.25"
+pip install tensorflow_datasets==4.9.3
+pip install --upgrade pydantic fastapi
 cd ../..
 cp ./SimplerEnv/simpler_env/policies/sim_cogact/adaptive_ensemble.py ./SimplerEnv/simpler_env/policies/sim_cogact/CogACT/adaptive_ensemble.py
 ```
@@ -88,6 +91,8 @@ cd ../SimplerEnv
 pip install -e .
 cd ManiSkill2_real2sim
 pip install -e .
+pip install "opencv-python<4.10" "numpy<2.0" "pyarrow<21.0.0"
+pip install matplotlib fastapi json_numpy draccus uvicorn
 cd ../..
 ```
 </details>
@@ -212,7 +217,7 @@ def run(self, host: str = "0.0.0.0", port: int = 9030) -> None:
 
 Each policy is assigned a default port like above. If you wish to use a different port, you can modify it directly in the corresponding script.
 
-### RoboVlM Server
+### RoboVLM Server
 
 <details>
 <summary><b>Detailed instructions</b> for preparing checkpoint and config files <b>(click to expand)</b></summary>

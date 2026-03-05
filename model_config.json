@@ -1,5 +1,5 @@
 {
-    "spatial_path": "spatialvla-4b-224-pt",
+    "spatial_path": "IPEC-COMMUNITY/spatialvla-4b-224-pt",
     "robovlm_ckpt": "checkpoints/kosmos_ph_bridge-post-train.pt",
     "robovlm_config": "configs/kosmos_ph_post_train_bridge.json"
 }
