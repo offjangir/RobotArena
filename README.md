@@ -142,6 +142,28 @@ conda activate XVLA
 cd ./X-VLA
 pip install -r requirements.txt
 ```
+
+If you encounter any problem when installing `av`, you can try replace the original required.txt with this:
+```
+av==15.0.0
+transformers<=4.51.3
+fastapi
+tensorboard
+peft==0.17.1
+uvicorn==0.34.3
+json_numpy==2.1.0
+safetensors==0.4.5
+numpy==1.26.3
+scipy==1.15.0
+einops==0.8.1
+timm==1.0.12
+mmengine==0.10.5
+pyarrow==20.0.0
+h5py==3.12.1
+accelerate==1.2.1
+mediapy==1.2.4
+```
+
 </details>
 
 ### 6. Environment Setup for Genesis
