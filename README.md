@@ -124,6 +124,8 @@ pip install "transformers == 4.47.0"
 ```bash
 cd ./open-pi-zero
 uv sync
+uv pip install -e ../SimplerEnv
+uv pip install -e ../SimplerEnv/ManiSkill2_real2sim
 uv pip install uvicorn fastapi json-numpy
 source scripts/set_path.sh
 ```
@@ -290,7 +292,7 @@ uv run src/model/vla/pizero.py --text_only --load_pretrained_weights --use_bf16
 </details>
 
 ```bash
-cd open-pi-zero
+cd open-pi-zero/open-pi-zero
 bash slurm/eval_simpler_bridge_server.sh
 ```
 
