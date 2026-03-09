@@ -36,16 +36,15 @@ def quat_from_axis_angle(axis, angle):
 
 def compute(actions, robot, dofs_idx_local):
     # NOTE: you are using sigmoid so make sure input is <0 for open and 0< for close
-    dofs_pos_target = MIN_OPENING + (MAX_OPENING - MIN_OPENING) * (
+    dofs_pos_target = (MIN_OPENING + (MAX_OPENING - MIN_OPENING) * (
         torch.sigmoid(actions) > 0.5
-    ).repeat_interleave(2, dim=1)
+    ).repeat_interleave(2, dim=1)).flatten()
     torques = (
-        100 * (dofs_pos_target - robot.get_dofs_position(dofs_idx_local=dofs_idx_local))
-        - 10 * robot.get_dofs_velocity(dofs_idx_local=dofs_idx_local)
+        100 * (dofs_pos_target - robot.get_dofs_position(dofs_idx_local=dofs_idx_local).flatten())
+        - 10 * robot.get_dofs_velocity(dofs_idx_local=dofs_idx_local).flatten()
     )
-    torques = torques[:,0]
     # NOTE: clip to some reasonable value
-    robot.control_dofs_force(torch.clip(torques[0], -20, 20), dofs_idx_local=dofs_idx_local)
+    robot.control_dofs_force(torch.clip(torques, -20, 20), dofs_idx_local=dofs_idx_local)
 
 
 class DefaulTest:
@@ -148,7 +147,7 @@ class DefaulTest:
                     pos = np.array(pos)
                     scale = attributes["scale"]
                     rotation = mat2quat(np.array(attributes["rotation"]))
-                    scale = self.simulator.asset_addtion(asset_file, pos=pos, scale=scale, quat=rotation, physics=physics)
+                    self.simulator.asset_addtion(asset_file, pos=pos, scale=scale, quat=rotation, physics=physics)
                     if "target" in object_name:
                         self.target_asset = self.simulator.asset_ID[scale][0]
                         self.target_rotation = attributes["rotation"]
@@ -224,7 +223,7 @@ class DefaulTest:
             jpg_as_text = base64.b64encode(buffer).decode('utf-8')
             payload = {
                 "instruction": self.task_description,
-                "image": jpg_as_text,  
+                "image": image.tolist() # jpg_as_text,  
             }
         
         return payload
@@ -453,7 +452,10 @@ class DefaulTest:
         
         folder = self.output_dir
         os.makedirs(folder, exist_ok=True)
-        gs.tools.animate(imx, os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.mp4"), fps=5)
+        # Filter out None images before animating
+        imx_filtered = [img for img in imx if img is not None]
+        if len(imx_filtered) > 0:
+            gs.tools.animate(imx_filtered, os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.mp4"), fps=5)
         world_states = np.array(world_states)
         base_states = np.array(base_states)
         np.savez(os.path.join(folder, f"test_{self.args.task_description}_{self.args.test_id}.npz"), world=world_states, base=base_states, **object_states)
