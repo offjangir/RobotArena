@@ -127,7 +127,10 @@ pip install "transformers == 4.47.0"
 <summary>environment open-pi-zero (click to expand)</summary>
 
 ```bash
-cd ./open-pi-zero
+cd open-pi-zero
+cd SimplerEnv
+git submodule update --init
+cd ../open-pi-zero
 uv sync
 uv pip install -e ../SimplerEnv
 uv pip install -e ../SimplerEnv/ManiSkill2_real2sim

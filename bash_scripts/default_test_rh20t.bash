@@ -14,9 +14,9 @@ POLICY=${2:-robovlm}
 MODE=${3:-default}  # "default" or "generate"
 
 if [ "$MODE" == "default" ]; then
-  OUT_DIR="./default_test_resubmit/$POLICY"
+  OUT_DIR="./default_test_rh20t/$POLICY"
 else
-  OUT_DIR="./generate_test_resubmit/$POLICY"
+  OUT_DIR="./generate_test_rh20t/$POLICY"
 fi
 
 echo "Starting Evaluation on Default Test"
