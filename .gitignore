@@ -3,7 +3,7 @@
 *.mp4
 
 # Ignore examples/data directory
-examples/data/
+# examples/data/
 
 # Ignore Python cache files
 __pycache__/
