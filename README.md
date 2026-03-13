@@ -351,6 +351,8 @@ python deploy.py \
 We provide a sample data for the scene generation and the test scripts.
 The data is located in the `examples/data` folder with the following structure. We have total 4 **default scenes** that are used in [SimplerEnv](https://github.com/simpler-env/SimplerEnv) and 20 **generated scenes** that are generated from our automated scene generation pipeline. 
 
+The full benchmark dataset, formatted to match this `examples/data` structure, is hosted on Hugging Face at [`sourlreapwr/RobotArena-Benchmark`](https://huggingface.co/datasets/sourlreapwr/RobotArena-Benchmark).
+
 ```text
 examples/data
 ├── assets/
