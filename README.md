@@ -37,6 +37,7 @@ Our framework leverages custom-built simulated environments—called **Robot Are
 
 - [📦 Output File Structure](#output-file-structure)  
 - [🧮 GVL Automated Scoring Script](#gvl-automated-scoring-script)
+- [📅 Release Timeline](#release-timeline)
 
 
 
@@ -151,7 +152,7 @@ cd ./X-VLA
 pip install -r requirements.txt
 ```
 
-If you encounter any problem when installing `av`, you can try replace the original required.txt with this:
+If you encounter any problem when installing `av`, you can try replace the original `requirements.txt` with this:
 ```
 av==15.0.0
 transformers<=4.51.3
@@ -274,7 +275,7 @@ Before running the script, make sure to set the model path to your local model p
     "spatial_path": <path_to_your_model>,
 }
 ```
-You can download the model from instrustions in the [SpatialVLA repository](https://github.com/SpatialVLA/SpatialVLA)
+You can download the model from instructions in the [SpatialVLA repository](https://github.com/SpatialVLA/SpatialVLA)
 
 </details>
 
@@ -304,7 +305,7 @@ python src/server/server_cogact.py
 ### open-pi-zero Server
 
 <details>
-<summary><b>Details</b> on downloading from Hugginface</summary>
+<summary><b>Details</b> on downloading from Hugging Face</summary>
 
 * [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) must be downloaded
 
@@ -315,7 +316,7 @@ cd open-pi-zero
 uv run src/model/vla/pizero.py --text_only --load_pretrained_weights --use_bf16
 ```
 
-* The author has provided these cehckpoints on Hugginface: [Bridge-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_uniform_step19296_2024-12-26_22-31_42.pt) | [Bridge-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_beta_step19296_2024-12-26_22-30_42.pt) | [Fractal-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_uniform_step29576_2024-12-31_22-26_42.pt) | [Fractal-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_beta_step29576_2024-12-29_13-10_42.pt)
+* The author has provided these checkpoints on Hugging Face: [Bridge-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_uniform_step19296_2024-12-26_22-31_42.pt) | [Bridge-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/bridge_beta_step19296_2024-12-26_22-30_42.pt) | [Fractal-Uniform](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_uniform_step29576_2024-12-31_22-26_42.pt) | [Fractal-Beta](https://huggingface.co/allenzren/open-pi-zero/blob/main/fractal_beta_step29576_2024-12-29_13-10_42.pt)
 
 * Remember to confirm the checkpoint location in `slurm/eval_simpler_bridge_server.sh` is correct.
 
@@ -478,7 +479,7 @@ bash bash_scripts/pose_test.bash 9020 spatial default
 
 ### 7. Object Variation Test [🏗 For Default Scenes Only]
 
-This test will only evaluate the default scenes. It will replace the original target object for the task will be changed (e.g., from a default spoon to another object generated frin another real scene specified by `obj_cnt` in the config), and the task is repeated.
+This test will only evaluate the default scenes. The original target object for the task will be replaced (e.g., from a default spoon to another object generated from another real scene specified by `obj_cnt` in the config), and the task is repeated.
 
 * Only this script requires the `obj_cnt` parameter in the config file to specify which object to use for the target object variation, and its config is defaulted to `configs/simpler.yaml`.
 
@@ -553,14 +554,14 @@ generate_test
 
 ## GVL Automated Scoring Script
 
-This script provides automated scoring for **GVL (Grounded Video Language)** using **Gemini 2.5 Pro Preview**. It supports multithreaded processing of video trials/tests and saves evaluation scores per video. An API key is required for accessing Gemini.
+This script provides automated task success and progress scoring using **Gemini 2.5 Pro Preview**, conditioning on both video and privileged simulation state. It supports multithreaded processing of trajectories and saves per-trajectory evaluation scores. An API key is required for accessing Gemini.
 
 ### Features
 
-- Automated video evaluation via Gemini
-- Fast multithreaded inference for scoring multiple trials
-- Supports single-shot and zero-shot evaluations
-- Saves structured results for analysis
+- Automated multimodal evaluation from video and simulation state (object and robot states)
+- Fast multithreaded inference for many trials
+- Supports single-shot and zero-shot prompting
+- Saves structured results for downstream analysis
 
 ### Requirements
 
@@ -577,3 +578,40 @@ Please use the bash script `bash_scripts/GVL.bash` for this. In GVL.bash, you ca
 * put your Gemini API key in `--key` argument in the bash script.
 * put the output folder path in `--dir` argument in the bash script.
 
+## 📅 Release Timeline
+- [x] **Benchmark code release** : Core benchmark environments, tasks, and evaluation scripts.
+- [ ] **Scene generation code release** : Automated scene generation and dataset creation pipeline.
+
+## Contributing & Support
+
+If you encounter bugs, have feature requests, or would like to contribute improvements:
+
+- **Issues**: Please open a GitHub Issue on this repository with a clear description and, if possible, a minimal reproduction.
+- **Pull requests**: We welcome PRs that improve documentation, add tests, or extend the benchmark. Please include a short summary and link to any related Issues.
+- **Questions**: For general questions or collaboration inquiries, feel free to contact the maintainers by email.
+
+**Maintainers**
+
+- **Yash Jangir** — `offjangir@gmail.com`  
+- **Yidi Zhang** — `zhangyidi.lily@gmail.com`  
+- **Pang Chi Lo** — `pcseanlo@gmail.com`
+
+## Citation
+
+If you use RobotArena in your research, please cite:
+
+```bibtex
+@misc{jangir2025robotarenainftyscalablerobot,
+  title={RobotArena $\infty$: Scalable Robot Benchmarking via Real-to-Sim Translation}, 
+  author={Yash Jangir and Yidi Zhang and Kashu Yamazaki and Chenyu Zhang and Kuan-Hsun Tu and Tsung-Wei Ke and Lei Ke and Yonatan Bisk and Katerina Fragkiadaki},
+  year={2025},
+  eprint={2510.23571},
+  archivePrefix={arXiv},
+  primaryClass={cs.RO},
+  url={https://arxiv.org/abs/2510.23571}, 
+}
+```
+
+## License
+
+This repository is released under the MIT License. See `LICENSE` for details.
