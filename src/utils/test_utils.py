@@ -74,7 +74,7 @@ def perturb_pos_lookat_rigid(pos, lookat, distance_cm=5):
     Returns:
         dict: direction -> (new_pos, new_lookat)
     """
-    print(f"perturb_pos_lookat_rigid: pos {pos}, lookat {lookat}, distance_cm {distance_cm}")
+    # print(f"perturb_pos_lookat_rigid: pos {pos}, lookat {lookat}, distance_cm {distance_cm}")
     
     distance = distance_cm / 100.0  # Convert to meters
     directions = {
@@ -294,8 +294,8 @@ def apply_safety_limits(
     safe_effort_upper = motors_effort_limit * torch.clip(-kd * (v_measured - safe_velocity_upper), -1.0, 1.0)
 
     # Clip command according to safe effort bounds
-    if (command < safe_effort_lower).any() or (safe_effort_upper < command).any():
-        print(command, safe_effort_lower, safe_effort_upper)
+    # if (command < safe_effort_lower).any() or (safe_effort_upper < command).any():
+        # print(command, safe_effort_lower, safe_effort_upper)
     res = torch.clip(command, safe_effort_lower, safe_effort_upper)
     return res
 
@@ -337,7 +337,7 @@ def resolve_overlap(entity1, entity2, entity1_name, entity2_name, buffer=0.005):
     )
 
     if aabb_overlap:
-        print(f"Overlap detected between {entity1_name} and {entity2_name}. Resolving...")
+        # print(f"Overlap detected between {entity1_name} and {entity2_name}. Resolving...")
         
         # 3. Determine which object is the 'Upper' one
         # We compare the geometric centers in Z to decide who should move up.
@@ -373,7 +373,7 @@ def resolve_overlap(entity1, entity2, entity1_name, entity2_name, buffer=0.005):
             # Genesis requires setting the full position (x, y, z)
             upper_entity.set_pos([current_pos[0], current_pos[1], new_z])
             
-            print(f"-> Elevated {upper_entity_name} by {lift_amount:.4f}m")
+            # print(f"-> Elevated {upper_entity_name} by {lift_amount:.4f}m")
             return True # Correction applied
 
     return False # No correction needed
