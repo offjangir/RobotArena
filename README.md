@@ -605,7 +605,7 @@ If you use RobotArena in your research, please cite:
 ```bibtex
 @misc{jangir2025robotarenainftyscalablerobot,
   title={RobotArena $\infty$: Scalable Robot Benchmarking via Real-to-Sim Translation}, 
-  author={Yash Jangir and Yidi Zhang and Kashu Yamazaki and Chenyu Zhang and Kuan-Hsun Tu and Tsung-Wei Ke and Lei Ke and Yonatan Bisk and Katerina Fragkiadaki},
+  author={Yash Jangir and Yidi Zhang and Pang-Chi Lo and Kashu Yamazaki and Chenyu Zhang and Kuan-Hsun Tu and Tsung-Wei Ke and Lei Ke and Yonatan Bisk and Katerina Fragkiadaki},
   year={2025},
   eprint={2510.23571},
   archivePrefix={arXiv},
