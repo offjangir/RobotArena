@@ -598,8 +598,11 @@ If you encounter bugs, have feature requests, or would like to contribute improv
 - **Yidi Zhang** — `zhangyidi.lily@gmail.com`  
 - **Pang Chi Lo** — `pcseanlo@gmail.com`
 
-## Citation
+## Acknowledgements
 
+This project builds upon several excellent open-source efforts in robot learning and vision-language-action models. We thank the contributors of [SimplerEnv](https://github.com/simpler-env/SimplerEnv) · [Octo](https://github.com/octo-models/octo) · [CogACT](https://github.com/microsoft/CogACT) · [X-VLA](https://github.com/2toinf/X-VLA) · [RoboVLMs](https://github.com/Robot-VLAs/RoboVLMs) · [Open-PI-Zero](https://github.com/allenzren/open-pi-zero) · [SpatialVLA](https://github.com/SpatialVLA/SpatialVLA)
+
+## Citation
 If you use RobotArena in your research, please cite:
 
 ```bibtex
